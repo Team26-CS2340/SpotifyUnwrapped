@@ -1,3 +1,35 @@
 backend/SpotifyUnwrapped/secrets.py ..
 backend/venv
 frontend/node_modules
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.db
+*.sqlite3
+db.sqlite3
+
+# React/Node
+node_modules/
+/build
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
