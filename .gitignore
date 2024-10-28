@@ -1,4 +1,4 @@
-backend/SpotifyUnwrapped/secrets.py ..
+backend/SpotifyUnwrapped/secrets.py
 backend/venv
 frontend/node_modules
 # Python
