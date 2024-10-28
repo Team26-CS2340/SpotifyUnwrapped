@@ -1,4 +1,4 @@
 # Default ignored files
 /shelf/
 /workspace.xml
-SpotifyUnwrapped/secrets.py
+backend/mainapp/secrets.py
