@@ -1,7 +1,7 @@
 # mainapp/serializers.py
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, SpotifyWrapHistory
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,3 +34,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         UserProfile.objects.create(user=user)
         return user
+    
+class SpotifyWrapHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpotifyWrapHistory
+        fields = ('id', 'created_at', 'wrap_data', 'year')
+

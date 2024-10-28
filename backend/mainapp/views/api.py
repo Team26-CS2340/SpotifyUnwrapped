@@ -4,9 +4,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate, login, logout
-from ..serializers import UserSerializer, RegisterSerializer, UserProfileSerializer
+from ..serializers import UserSerializer, RegisterSerializer, UserProfileSerializer, SpotifyWrapHistorySerializer
 from django.contrib.auth.models import User
-from ..models import UserProfile
+from ..models import UserProfile, SpotifyWrapHistory
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -55,3 +55,34 @@ def get_user_profile(request):
             {'message': 'Profile not found'}, 
             status=status.HTTP_404_NOT_FOUND
         )
+    
+@api_view(['GET', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def manage_wraps(request):
+    if request.method == 'GET':
+        wraps = SpotifyWrapHistory.objects.filter(user_profile__user=request.user)
+        serializer = SpotifyWrapHistorySerializer(wraps, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'DELETE':
+        wrap_id = request.data.get('wrap_id')
+        try:
+            wrap = SpotifyWrapHistory.objects.get(
+                id=wrap_id, 
+                user_profile__user=request.user
+            )
+            wrap.delete()
+            return Response({'message': 'Wrap deleted successfully'})
+        except SpotifyWrapHistory.DoesNotExist:
+            return Response(
+                {'message': 'Wrap not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_account(request):
+    user = request.user
+    user.delete()  # This will cascade delete UserProfile due to OneToOneField
+    return Response({'message': 'Account deleted successfully'})
+

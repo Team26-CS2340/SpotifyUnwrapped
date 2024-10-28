@@ -10,6 +10,18 @@ class UserProfile(models.Model):
     total_spotify_minutes = models.IntegerField(null=True, blank=True)
     top_artists = models.TextField(null=True, blank=True)
     top_genres = models.TextField(null=True, blank=True)
+    spotify_access_token = models.CharField(max_length=255, null=True, blank=True)
+    spotify_refresh_token = models.CharField(max_length=255, null=True, blank=True)
+    spotify_token_expires = models.DateTimeField(null=True, blank=True)
+
+class SpotifyWrapHistory(models.Model):
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    wrap_data = models.JSONField()  # Store complete wrap data
+    year = models.IntegerField()
+    
+    class Meta:
+        ordering = ['-created_at']  
 
     def __str__(self):
         return self.user.username
