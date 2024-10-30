@@ -1,6 +1,7 @@
 backend/SpotifyUnwrapped/secrets.py
 backend/venv
 frontend/node_modules
+backend/.env
 # Python
 venv/
 __pycache__/

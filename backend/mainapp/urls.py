@@ -1,18 +1,16 @@
 from django.urls import path
-from .views.api import register_api, login_api, logout_api, get_user_profile
+from .views.api import spotify_callback, spotify_login
 from .views.auth import register, sign_in, sign_out
 from .views import api, testapi
 
 # Split URL patterns into two groups
 api_urlpatterns = [
-    path('api/auth/register/', register_api, name='register_api'),
-    path('api/auth/login/', login_api, name='login_api'),
-    path('api/auth/logout/', logout_api, name='logout_api'),
-    path('api/profile/', get_user_profile, name='user_profile_api'),
-    path('api/wraps/', api.manage_wraps, name='manage_wraps'),
-    path('api/account/delete/', api.delete_account, name='delete_account'),
-    path('api/test/create-wrap/', testapi.test_create_wrap, name='test_create_wrap'),
-    path('api/test/list-wraps/', testapi.test_list_wraps, name='test_list_wraps'),
+    # In urls.py, add to api_urlpatterns
+    path('api/user/data/', api.get_current_user_data, name='get_user_data'),
+    path('api/user/refresh-spotify/', api.refresh_spotify_data, name='refresh_spotify_data'),
+    path('api/user/me/', api.get_current_user, name='get_current_user'),
+    path('api/spotify/login/', api.spotify_login, name='spotify_login'),
+    path('api/spotify/callback/', api.spotify_callback, name='spotify_callback'),
 ]
 
 # Traditional template view patterns
