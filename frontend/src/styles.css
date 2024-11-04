@@ -1,0 +1,122 @@
+/* Base styles */
+main {
+    max-width: 800px; /* Optional: Limit the width of the main content */
+    margin: 0 auto;   /* Center the main content */
+    padding: 20px;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0; /* Light mode background */
+    color: #333; /* Light mode text color */
+    margin: 0;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: #1DB954; /* Spotify green */
+}
+
+footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+    background-color: #181818; /* Dark background */
+    color: #ffffff; /* Light text color */
+}
+
+header.dark-mode {
+    background-color: #282828; /* Dark header background */
+}
+
+/* Harrison Ford theme styles */
+body.harrison-ford-theme {
+    background-color: #f0e68c; /* Light yellow */
+    color: #8b4513; /* SaddleBrown for text */
+}
+
+body.harrison-ford-theme header, 
+body.harrison-ford-theme footer {
+    background-color: #deb887; /* Burlywood */
+}
+
+/* Custom checkbox styles */
+label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+}
+
+input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"] + span {
+    width: 40px;
+    height: 20px;
+    background: #ccc;
+    border-radius: 20px;
+    position: relative;
+    transition: background 0.3s;
+}
+
+input[type="checkbox"]:checked + span {
+    background: #1DB954;
+}
+
+input[type="checkbox"] + span:before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    transition: transform 0.3s;
+}
+
+input[type="checkbox"]:checked + span:before {
+    transform: translateX(20px);
+}
+#harrisonFordImage {
+    position: fixed; /* Use fixed positioning */
+    bottom: 20px;    /* Distance from the bottom */
+    left: 20px;      /* Distance from the left */
+    z-index: 1000;   /* Ensure it appears above other content */
+    text-align: left; /* Align text to the left */
+}
+
+#harrisonFordImage img {
+    max-width: 200px; /* Set a max width for the image */
+    height: auto;     /* Maintain aspect ratio */
+}
+#share {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#share a {
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+#share a:hover {
+    background-color: #0056b3;
+}
+
