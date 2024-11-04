@@ -38,47 +38,61 @@ const StatCard = ({ icon: Icon, title, value }) => (
       </div>
       <h2 className="text-lg font-semibold">{title}</h2>
     </div>
-    <p className="text-3xl font-bold">{value}</p>
+    <p className="text-3xl font-bold">{value || '0'}</p>
   </div>
 );
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'Never';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/user/data/', {
+        withCredentials: true
+      });
+      setUserData(response.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      setError(err.response?.data?.message || 'Failed to load user data');
+      if (err.response?.status === 401) {
+        window.location.href = 'http://localhost:8000/api/spotify/login/';
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/api/user/data/', {
-          withCredentials: true
-        });
-        setUserData(response.data);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load user data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserData();
   }, []);
 
   const handleRefreshData = async () => {
     try {
-      setLoading(true);
-      await axios.post('http://localhost:8000/api/user/refresh-spotify/', {}, {
+      setRefreshing(true);
+      await axios.post('http://localhost:8000/api/spotify/refresh-data/', {}, {
         withCredentials: true
       });
-      // Fetch updated data
-      const response = await axios.get('http://localhost:8000/api/user/data/', {
-        withCredentials: true
-      });
-      setUserData(response.data);
+      await fetchUserData();
     } catch (err) {
+      console.error('Error refreshing data:', err);
       setError(err.response?.data?.message || 'Failed to refresh data');
     } finally {
-      setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -92,14 +106,14 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-red-500 text-center">
-          <p className="mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.href = '/'}
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.href = 'http://localhost:8000/api/spotify/login/'}
             className="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600"
           >
-            Back to Login
+            Reconnect to Spotify
           </button>
         </div>
       </div>
@@ -117,20 +131,35 @@ const Dashboard = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold">
-                {userData?.spotify_profile?.display_name}
+                {userData?.spotify_profile?.display_name || 'Spotify User'}
               </h1>
               <p className="text-gray-400">
-                {userData?.spotify_profile?.product} account
+                {userData?.spotify_profile?.product || 'free'} account
               </p>
             </div>
           </div>
           <button
             onClick={handleRefreshData}
-            className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-full transition"
+            disabled={refreshing}
+            className={`px-4 py-2 bg-green-500 hover:bg-green-600 rounded-full transition flex items-center gap-2 ${
+              refreshing ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
-            Refresh Data
+            {refreshing ? (
+              <>
+                <LoadingSpinner />
+                <span>Refreshing...</span>
+              </>
+            ) : (
+              'Refresh Data'
+            )}
           </button>
         </div>
+
+        {/* Last Updated */}
+        <p className="text-gray-400 mb-8">
+          Last updated: {formatDate(userData?.metadata?.last_updated)}
+        </p>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -154,36 +183,47 @@ const Dashboard = () => {
         {/* Top Artists */}
         <div className="bg-gray-800 p-6 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-4">Top Artists</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {userData?.spotify_data?.top_artists?.items?.map((artist, index) => (
-              <div key={artist.id} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
-                <span className="text-lg font-bold text-gray-400">#{index + 1}</span>
-                <div>
-                  <p className="font-semibold">{artist.name}</p>
-                  <p className="text-sm text-gray-400">
-                    {artist.genres?.slice(0, 2).join(', ')}
-                  </p>
+          {userData?.spotify_data?.top_artists?.items?.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {userData.spotify_data.top_artists.items.map((artist, index) => (
+                <div key={artist.id} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
+                  <span className="text-lg font-bold text-gray-400">#{index + 1}</span>
+                  <div>
+                    <p className="font-semibold">{artist.name}</p>
+                    <p className="text-sm text-gray-400">
+                      {artist.genres?.slice(0, 2).join(', ')}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-400">No top artists data available</p>
+          )}
         </div>
 
         {/* Recently Played */}
         <div className="bg-gray-800 p-6 rounded-lg">
           <h2 className="text-xl font-bold mb-4">Recently Played</h2>
-          <div className="space-y-4">
-            {userData?.spotify_data?.recently_played?.items?.slice(0, 5).map((item) => (
-              <div key={item.played_at} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
-                <div>
-                  <p className="font-semibold">{item.track.name}</p>
-                  <p className="text-sm text-gray-400">
-                    {item.track.artists.map(a => a.name).join(', ')}
-                  </p>
+          {userData?.spotify_data?.recently_played?.items?.length > 0 ? (
+            <div className="space-y-4">
+              {userData.spotify_data.recently_played.items.slice(0, 5).map((item) => (
+                <div key={item.played_at} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
+                  <div>
+                    <p className="font-semibold">{item.track.name}</p>
+                    <p className="text-sm text-gray-400">
+                      {item.track.artists.map(a => a.name).join(', ')}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Played: {formatDate(item.played_at)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-400">No recently played tracks available</p>
+          )}
         </div>
       </div>
     </div>

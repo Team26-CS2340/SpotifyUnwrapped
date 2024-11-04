@@ -8,7 +8,6 @@ api_urlpatterns = [
     # In urls.py, add to api_urlpatterns
     path('api/user/data/', api.get_current_user_data, name='get_user_data'),
     path('api/user/refresh-spotify/', api.refresh_spotify_data, name='refresh_spotify_data'),
-    path('api/user/me/', api.get_current_user, name='get_current_user'),
     path('api/spotify/login/', api.spotify_login, name='spotify_login'),
     path('api/spotify/callback/', api.spotify_callback, name='spotify_callback'),
 ]

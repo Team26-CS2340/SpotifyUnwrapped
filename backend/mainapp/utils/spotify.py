@@ -2,10 +2,12 @@ import os
 import base64
 import requests
 from urllib.parse import urlencode
+import logging
 from datetime import datetime, timedelta
 
 from django.conf import settings
 
+logger = logging.getLogger(__name__)
 class SpotifyAPI:
     def __init__(self):
         self.client_id = settings.SPOTIFY_CLIENT_ID
@@ -89,12 +91,17 @@ class SpotifyAPI:
 
     def get_user_top_items(self, access_token, item_type, time_range='medium_term', limit=20):
         """Get user's top artists or tracks"""
+        logger.debug(f"Fetching top {item_type}...")
         headers = {'Authorization': f'Bearer {access_token}'}
         response = requests.get(
             f"{self.base_url}/me/top/{item_type}",
             headers=headers,
             params={'time_range': time_range, 'limit': limit}
         )
+        logger.debug(f"Top {item_type} response status: {response.status_code}")
+        if response.status_code != 200:
+            logger.error(f"Failed to get top {item_type}: {response.text}")
+            raise Exception(f"Failed to get top {item_type}: {response.text}")
         return response.json()
 
     def get_recently_played(self, access_token, limit=50):
@@ -108,9 +115,11 @@ class SpotifyAPI:
         return response.json()
 
     def get_saved_tracks_count(self, access_token):
-        """Get the total number of user's saved tracks"""
         headers = {'Authorization': f'Bearer {access_token}'}
         response = requests.get(f"{self.base_url}/me/tracks", headers=headers)
+        if response.status_code != 200:
+            logger.error(f"Failed to get saved tracks count: {response.text}")
+            return 0
         return response.json().get('total', 0)
 
     def get_saved_albums_count(self, access_token):

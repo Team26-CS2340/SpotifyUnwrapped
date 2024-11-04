@@ -73,6 +73,15 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+SPOTIFY_SCOPES = [
+    'user-read-email',
+    'user-read-private',
+    'user-top-read',
+    'user-read-recently-played',
+    'user-library-read',
+    'playlist-read-private'
+]
+
 # Session settings
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
