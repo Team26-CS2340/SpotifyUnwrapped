@@ -13,11 +13,96 @@ import secrets
 import logging
 import json
 from ..utils.spotify import SpotifyAPI
+import google.generativeai as genai
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 # Store state in memory (for testing only - should use session/cache in production)
 STATE_STORE = {}
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def get_personality_analysis(request):
+    try:
+        profile = request.user.userprofile
+        
+        # Configure Gemini
+        genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+        model = genai.GenerativeModel('gemini-pro')
+        
+        # Prepare the data for Gemini
+        music_data = {
+            'top_artists': [],
+            'top_genres': set(),
+            'top_tracks': []
+        }
+        
+        # Extract top artists and their genres
+        if profile.top_artists and 'items' in profile.top_artists:
+            for artist in profile.top_artists['items'][:10]:  # Top 10 artists
+                music_data['top_artists'].append(artist['name'])
+                if 'genres' in artist:
+                    music_data['top_genres'].update(artist['genres'])
+        
+        # Extract top tracks
+        if profile.top_tracks and 'items' in profile.top_tracks:
+            for track in profile.top_tracks['items'][:10]:  # Top 10 tracks
+                artist_names = [artist['name'] for artist in track['artists']]
+                music_data['top_tracks'].append({
+                    'name': track['name'],
+                    'artists': artist_names
+                })
+        
+        # Craft the prompt for Gemini
+        prompt = f"""
+        Based on this person's music taste, create a fun and creative personality profile. 
+        Here's their music data:
+
+        Top Artists: {', '.join(music_data['top_artists'])}
+        
+        Common Genres: {', '.join(list(music_data['top_genres'])[:10])}
+        
+        Top Tracks: {', '.join([f"{track['name']} by {', '.join(track['artists'])}" for track in music_data['top_tracks']])}
+
+        Please provide a creative analysis that includes:
+        1. Likely personality traits and general vibe
+        2. Probable fashion style and aesthetic preferences
+        3. Potential hobbies and interests
+        4. Social characteristics and friend group dynamics
+        5. What their ideal weekend might look like
+
+        Keep the tone light, fun, and engaging. Be specific but not stereotypical. 
+        Format the response in a clear, readable way with sections.
+        """
+
+        # Generate the analysis
+        response = model.generate_content(prompt)
+        
+        # Return the analysis
+        return Response({
+            'analysis': response.text,
+            'music_data': {
+                'top_artists': music_data['top_artists'],
+                'top_genres': list(music_data['top_genres']),
+                'top_tracks': [f"{track['name']} by {', '.join(track['artists'])}" for track in music_data['top_tracks']]
+            }
+        })
+        
+    except UserProfile.DoesNotExist:
+        return Response({
+            'error': 'Profile not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        print(f"Error in personality analysis: {str(e)}")  # For debugging
+        return Response({
+            'error': 'Failed to generate personality analysis',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
