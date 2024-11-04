@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';  // Add useAuth here
 import SpotifyLogin from './components/SpotifyLogin';
 import Dashboard from './components/Dashboard';
+import Home from './components/Home';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -21,6 +22,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<SpotifyLogin />} />
+          <Route path="/testing" element={<Home />} />
           <Route 
             path="/dashboard" 
             element={
