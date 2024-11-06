@@ -4,7 +4,10 @@ from .views.api import (  # Explicitly import all api views
     spotify_login, 
     get_current_user_data,
     refresh_spotify_data,
-    get_personality_analysis
+    get_personality_analysis,
+    create_spotify_wrap,
+    get_user_wraps,
+    get_wrap_detail
 )
 from .views.auth import register, sign_in, sign_out
 from .views import api, testapi
@@ -21,6 +24,10 @@ api_urlpatterns = [
     path('api/spotify/login/', spotify_login, name='spotify_login'),
     path('api/spotify/callback/', spotify_callback, name='spotify_callback'),
     path('api/user/personality-analysis/', get_personality_analysis, name='personality_analysis'),
+    path('api/wraps/create/', create_spotify_wrap, name='create_wrap'),
+    path('api/wraps/', get_user_wraps, name='get_wraps'),
+    path('api/wraps/<int:wrap_id>/', get_wrap_detail, name='get_wrap_detail'),
+
 ]
 
 # Traditional template view patterns

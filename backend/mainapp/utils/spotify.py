@@ -151,3 +151,35 @@ class SpotifyAPI:
         except Exception as e:
             print(f"Error parsing profile response: {str(e)}")
             raise
+    def get_user_saved_albums(self, access_token, limit=20):
+        headers = {
+            'Authorization': f'Bearer {access_token}'
+        }
+        response = requests.get(
+            f'https://api.spotify.com/v1/me/albums',
+            headers=headers,
+            params={'limit': limit}
+        )
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.error(f"Error getting saved albums: {response.text}")
+            return {'items': []}
+
+    def get_followed_artists(self, access_token, limit=5):
+        headers = {
+            'Authorization': f'Bearer {access_token}'
+        }
+        response = requests.get(
+            'https://api.spotify.com/v1/me/following',
+            headers=headers,
+            params={
+                'type': 'artist',
+                'limit': limit
+            }
+        )
+        if response.status_code == 200:
+            return response.json().get('artists', {'items': []})
+        else:
+            logger.error(f"Error getting followed artists: {response.text}")
+            return {'items': []}

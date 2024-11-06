@@ -65,6 +65,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 ]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [

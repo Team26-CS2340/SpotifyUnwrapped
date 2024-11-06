@@ -7,6 +7,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('spotify_display_name', 'spotify_email', 'spotify_product', 'saved_tracks_count', 'last_data_update')
     search_fields = ('spotify_display_name', 'spotify_email')
     readonly_fields = ('top_artists_display', 'top_tracks_display', 'recently_played_display', 'created_at', 'last_data_update')
+    
     fieldsets = (
         ('User Info', {
             'fields': (
@@ -86,6 +87,72 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(SpotifyWrapHistory)
 class SpotifyWrapHistoryAdmin(admin.ModelAdmin):
-    list_display = ('user_profile', 'year', 'time_range', 'listening_minutes', 'created_at')
-    list_filter = ('year', 'time_range')
+    list_display = ('user_profile', 'year', 'created_at')
+    list_filter = ('year',)
     search_fields = ('user_profile__spotify_display_name',)
+    readonly_fields = ('wrap_content_display', 'created_at')
+
+    fieldsets = (
+        ('Basic Info', {
+            'fields': (
+                'user_profile',
+                'year',
+                'created_at',
+            )
+        }),
+        ('Wrap Content', {
+            'fields': (
+                'wrap_content_display',
+            )
+        }),
+        ('Raw Data', {
+            'fields': (
+                'top_artists',
+                'top_artist',
+                'top_albums',
+                'top_album',
+                'top_tracks',
+                'top_track',
+                'top_followed_artists',
+                'top_genres',
+            ),
+            'classes': ('collapse',)
+        })
+    )
+
+    def wrap_content_display(self, obj):
+        html = "<div style='margin-bottom: 20px;'>"
+        
+        # Top Artist
+        html += "<h3>Top Artist</h3>"
+        html += f"<p>{obj.top_artist.get('name', 'Unknown')}</p>"
+        
+        # Top Album
+        html += "<h3>Top Album</h3>"
+        html += f"<p>{obj.top_album.get('name', 'Unknown')}</p>"
+        
+        # Top Track
+        html += "<h3>Top Track</h3>"
+        html += f"<p>{obj.top_track.get('name', 'Unknown')}</p>"
+        
+        # Top Artists
+        html += "<h3>Top Artists</h3><ol>"
+        for artist in obj.top_artists.get('items', [])[:5]:
+            html += f"<li>{artist.get('name', 'Unknown')}</li>"
+        html += "</ol>"
+        
+        # Top Genres
+        html += "<h3>Top Genres</h3><ul>"
+        for genre in obj.top_genres[:5]:
+            html += f"<li>{genre}</li>"
+        html += "</ul>"
+        
+        # Top Followed Artists
+        html += "<h3>Top Followed Artists</h3><ol>"
+        for artist in obj.top_followed_artists.get('items', [])[:5]:
+            html += f"<li>{artist.get('name', 'Unknown')}</li>"
+        html += "</ol>"
+        
+        html += "</div>"
+        return format_html(html)
+    wrap_content_display.short_description = 'Wrap Content'

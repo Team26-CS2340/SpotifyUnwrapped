@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import redirect
-from ..models import UserProfile
+from ..models import UserProfile, SpotifyWrapHistory
 from django.contrib.auth import login
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -212,6 +212,9 @@ def get_current_user_data(request):
                     'detail': str(e)
                 }, status=status.HTTP_401_UNAUTHORIZED)
 
+        # Get latest wrap if exists
+        latest_wrap = SpotifyWrapHistory.objects.filter(user_profile=profile).first()
+
         return Response({
             'user': {
                 'id': request.user.id,
@@ -232,6 +235,7 @@ def get_current_user_data(request):
                 'saved_albums_count': profile.saved_albums_count,
                 'playlist_count': profile.playlist_count,
             },
+            'latest_wrap': latest_wrap.id if latest_wrap else None,
             'metadata': {
                 'last_updated': profile.last_data_update,
                 'token_expires': profile.spotify_token_expires,
@@ -240,6 +244,152 @@ def get_current_user_data(request):
     except UserProfile.DoesNotExist:
         return Response({
             'error': 'Profile not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def create_spotify_wrap(request):
+    try:
+        profile = request.user.userprofile
+        spotify = SpotifyAPI()
+        
+        # Check if token needs refresh
+        if profile.spotify_token_expires and profile.spotify_token_expires <= timezone.now():
+            try:
+                new_token_info = spotify.refresh_token(profile.spotify_refresh_token)
+                profile.spotify_access_token = new_token_info['access_token']
+                if 'refresh_token' in new_token_info:
+                    profile.spotify_refresh_token = new_token_info['refresh_token']
+                profile.spotify_token_expires = timezone.now() + timedelta(seconds=new_token_info['expires_in'])
+                profile.save()
+            except Exception as e:
+                return Response({
+                    'error': 'Token refresh failed',
+                    'detail': str(e)
+                }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        access_token = profile.spotify_access_token
+        current_year = timezone.now().year
+
+        # Get fresh Spotify data
+        try:
+            # Get top artists
+            top_artists_data = spotify.get_user_top_items(access_token, 'artists', limit=20)
+            top_artist = top_artists_data['items'][0] if top_artists_data.get('items') else {}
+
+            # Get top tracks
+            top_tracks_data = spotify.get_user_top_items(access_token, 'tracks', limit=20)
+            top_track = top_tracks_data['items'][0] if top_tracks_data.get('items') else {}
+
+            # Get user saved albums and sort by most played/recent
+            saved_albums_data = spotify.get_user_saved_albums(access_token, limit=20)
+            top_albums = {
+                'items': saved_albums_data.get('items', [])
+            }
+            top_album = saved_albums_data['items'][0]['album'] if saved_albums_data.get('items') else {}
+
+            # Get followed artists
+            followed_artists = spotify.get_followed_artists(access_token, limit=5)
+
+            # Extract genres from top artists
+            genres_list = []
+            for artist in top_artists_data.get('items', []):
+                genres_list.extend(artist.get('genres', []))
+            
+            # Count genre occurrences and get top genres
+            genre_counts = {}
+            for genre in genres_list:
+                genre_counts[genre] = genre_counts.get(genre, 0) + 1
+            top_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+            top_genres = [genre for genre, count in top_genres]
+
+            # Create new wrap
+            wrap = SpotifyWrapHistory.objects.create(
+                user_profile=profile,
+                year=current_year,
+                top_artists=top_artists_data,
+                top_artist=top_artist,
+                top_albums=top_albums,
+                top_album=top_album,
+                top_tracks=top_tracks_data,
+                top_track=top_track,
+                top_followed_artists=followed_artists,
+                top_genres=top_genres
+            )
+            
+            return Response({
+                'message': 'Spotify wrap created successfully',
+                'wrap_id': wrap.id,
+                'data': {
+                    'top_artist': top_artist.get('name'),
+                    'top_track': top_track.get('name'),
+                    'top_album': top_album.get('name'),
+                    'top_genres': top_genres[:5]
+                }
+            })
+
+        except Exception as e:
+            logger.error(f"Error creating wrap: {str(e)}")
+            return Response({
+                'error': 'Failed to create wrap',
+                'detail': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+    except UserProfile.DoesNotExist:
+        return Response({
+            'error': 'Profile not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def get_user_wraps(request):
+    try:
+        profile = request.user.userprofile
+        wraps = SpotifyWrapHistory.objects.filter(user_profile=profile)
+        
+        wraps_data = [{
+            'id': wrap.id,
+            'year': wrap.year,
+            'created_at': wrap.created_at,
+            'top_artist': wrap.top_artist,
+            'top_track': wrap.top_track,
+            'top_album': wrap.top_album
+        } for wrap in wraps]
+        
+        return Response(wraps_data)
+    
+    except UserProfile.DoesNotExist:
+        return Response({
+            'error': 'Profile not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def get_wrap_detail(request, wrap_id):
+    try:
+        profile = request.user.userprofile
+        wrap = SpotifyWrapHistory.objects.get(id=wrap_id, user_profile=profile)
+        
+        return Response({
+            'id': wrap.id,
+            'year': wrap.year,
+            'created_at': wrap.created_at,
+            'top_artists': wrap.top_artists,
+            'top_artist': wrap.top_artist,
+            'top_albums': wrap.top_albums,
+            'top_album': wrap.top_album,
+            'top_tracks': wrap.top_tracks,
+            'top_track': wrap.top_track,
+            'top_followed_artists': wrap.top_followed_artists,
+            'top_genres': wrap.top_genres
+        })
+    
+    except SpotifyWrapHistory.DoesNotExist:
+        return Response({
+            'error': 'Wrap not found'
         }, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])

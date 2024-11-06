@@ -6,6 +6,7 @@ import SpotifyLogin from './components/SpotifyLogin';
 import Dashboard from './components/Dashboard';
 import Home from './components/Home';
 import PersonalityAnalysis from './components/PersonalityAnalysis';
+import SpotifyWrap from './components/wraps/SpotifyWrap';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -33,6 +34,8 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route path="/personality-analysis" element={<PersonalityAnalysis />} />
+          <Route path="/wrap" element={<SpotifyWrap />} />
         </Routes>
       </Router>
     </AuthProvider>
