@@ -53,7 +53,7 @@ class UserProfileAdmin(admin.ModelAdmin):
             return "No data available"
         artists = obj.top_artists.get('items', [])
         html = "<ol>"
-        for artist in artists[:10]:  # Show top 10
+        for artist in artists[:10]:
             html += f"<li>{artist.get('name', 'Unknown')} - Genres: {', '.join(artist.get('genres', []))}</li>"
         html += "</ol>"
         return format_html(html)
@@ -64,7 +64,7 @@ class UserProfileAdmin(admin.ModelAdmin):
             return "No data available"
         tracks = obj.top_tracks.get('items', [])
         html = "<ol>"
-        for track in tracks[:10]:  # Show top 10
+        for track in tracks[:10]:
             artists = ', '.join([artist.get('name', '') for artist in track.get('artists', [])])
             html += f"<li>{track.get('name', 'Unknown')} - {artists}</li>"
         html += "</ol>"
@@ -76,7 +76,7 @@ class UserProfileAdmin(admin.ModelAdmin):
             return "No data available"
         tracks = obj.recently_played.get('items', [])
         html = "<ol>"
-        for item in tracks[:10]:  # Show last 10
+        for item in tracks[:10]:
             track = item.get('track', {})
             artists = ', '.join([artist.get('name', '') for artist in track.get('artists', [])])
             played_at = item.get('played_at', 'Unknown time')
@@ -121,38 +121,61 @@ class SpotifyWrapHistoryAdmin(admin.ModelAdmin):
     )
 
     def wrap_content_display(self, obj):
-        html = "<div style='margin-bottom: 20px;'>"
-        
-        # Top Artist
-        html += "<h3>Top Artist</h3>"
-        html += f"<p>{obj.top_artist.get('name', 'Unknown')}</p>"
-        
-        # Top Album
-        html += "<h3>Top Album</h3>"
-        html += f"<p>{obj.top_album.get('name', 'Unknown')}</p>"
-        
-        # Top Track
-        html += "<h3>Top Track</h3>"
-        html += f"<p>{obj.top_track.get('name', 'Unknown')}</p>"
-        
-        # Top Artists
-        html += "<h3>Top Artists</h3><ol>"
-        for artist in obj.top_artists.get('items', [])[:5]:
-            html += f"<li>{artist.get('name', 'Unknown')}</li>"
-        html += "</ol>"
-        
-        # Top Genres
-        html += "<h3>Top Genres</h3><ul>"
-        for genre in obj.top_genres[:5]:
-            html += f"<li>{genre}</li>"
-        html += "</ul>"
-        
-        # Top Followed Artists
-        html += "<h3>Top Followed Artists</h3><ol>"
-        for artist in obj.top_followed_artists.get('items', [])[:5]:
-            html += f"<li>{artist.get('name', 'Unknown')}</li>"
-        html += "</ol>"
-        
-        html += "</div>"
-        return format_html(html)
-    wrap_content_display.short_description = 'Wrap Content'
+        try:
+            html = "<div style='margin-bottom: 20px;'>"
+            
+            # Top Artist
+            html += "<h3>Top Artist</h3>"
+            if isinstance(obj.top_artist, dict):
+                html += f"<p>Artist: {obj.top_artist.get('name', 'Unknown')}</p>"
+                if obj.top_artist.get('genres'):
+                    html += f"<p>Genres: {', '.join(obj.top_artist.get('genres', []))}</p>"
+            
+            # Top Album
+            html += "<h3>Top Album</h3>"
+            if isinstance(obj.top_album, dict):
+                html += f"<p>Album: {obj.top_album.get('name', 'Unknown')}</p>"
+                if obj.top_album.get('artists'):
+                    artist_names = [artist.get('name', 'Unknown') for artist in obj.top_album.get('artists', [])]
+                    html += f"<p>Artists: {', '.join(artist_names)}</p>"
+            
+            # Top Track
+            html += "<h3>Top Track</h3>"
+            if isinstance(obj.top_track, dict):
+                html += f"<p>Track: {obj.top_track.get('name', 'Unknown')}</p>"
+                if obj.top_track.get('artists'):
+                    artist_names = [artist.get('name', 'Unknown') for artist in obj.top_track.get('artists', [])]
+                    html += f"<p>Artists: {', '.join(artist_names)}</p>"
+            
+            # Top Artists
+            html += "<h3>Top Artists</h3><ol>"
+            if isinstance(obj.top_artists, dict) and 'items' in obj.top_artists:
+                for artist in obj.top_artists['items'][:5]:
+                    html += f"<li>{artist.get('name', 'Unknown')}"
+                    if artist.get('genres'):
+                        html += f" - Genres: {', '.join(artist.get('genres', []))}"
+                    html += "</li>"
+            html += "</ol>"
+            
+            # Top Genres
+            html += "<h3>Top Genres</h3><ul>"
+            if isinstance(obj.top_genres, list):
+                for genre_data in obj.top_genres[:5]:
+                    if isinstance(genre_data, dict):
+                        html += f"<li>{genre_data.get('name', 'Unknown')} ({genre_data.get('count', 0)} occurrences)</li>"
+                    else:
+                        html += f"<li>{genre_data}</li>"
+            html += "</ul>"
+            
+            # Followed Artists
+            html += "<h3>Top Followed Artists</h3><ol>"
+            if isinstance(obj.top_followed_artists, dict) and 'artists' in obj.top_followed_artists:
+                for artist in obj.top_followed_artists['artists'].get('items', [])[:5]:
+                    html += f"<li>{artist.get('name', 'Unknown')}</li>"
+            html += "</ol>"
+            
+            html += "</div>"
+            return format_html(html)
+        except Exception as e:
+            return format_html(f"<div class='error'>Error displaying wrap content: {str(e)}</div>")
+    wrap_content_display.short_description = 'Wrap Content Summary'
