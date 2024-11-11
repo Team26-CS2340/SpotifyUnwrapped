@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';  // Add useAuth here
 import SpotifyLogin from './components/SpotifyLogin';
 import Dashboard from './components/Dashboard';
-import Home from './components/Home';
 import PersonalityAnalysis from './components/PersonalityAnalysis';
 import SpotifyWrap from './components/wraps/SpotifyWrap';
 
@@ -24,7 +23,6 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<SpotifyLogin />} />
-          <Route path="/testing" element={<Home />} />
           <Route path="/personality" element={<PersonalityAnalysis />} />
           <Route 
             path="/dashboard" 
