@@ -126,7 +126,7 @@ const Layout = ({ children }) => {
                         alignItems: 'center'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Link to="/" style={{ ...navLinkStyle, fontSize: '24px', fontWeight: 'bold', color: '#1DB954' }}>
+                            <Link to="/Dashboard" style={{ ...navLinkStyle, fontSize: '24px', fontWeight: 'bold', color: '#1DB954' }}>
                                 Spotify Wrapped
                             </Link>
                             <nav style={{ marginLeft: '40px' }}>
@@ -159,13 +159,11 @@ const Layout = ({ children }) => {
 
                 {/* Main Content */}
                 <main style={{ 
-                    paddingTop: '80px',
+                    paddingTop: '120px', // Increased padding to prevent content overlap
                     backgroundColor: isDarkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.7)',
                     minHeight: '100vh',
-                    width: '100vw',
-                    padding: 0,
-                    boxSizing: 'border-box',
-                    overflowX: 'hidden'
+                    position: 'relative',
+                    overflow: 'hidden' // Prevents horizontal scrollbar
                 }}>
                     {children}
                 </main>

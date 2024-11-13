@@ -54,7 +54,6 @@ export default function Dashboard() {
             setRefreshing(false);
         }
     };
-
     if (loading) {
         return (
             <Layout>
@@ -62,7 +61,7 @@ export default function Dashboard() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: '100vh'
+                    minHeight: 'calc(100vh - 120px)' // Adjust for new top padding
                 }}>
                     <div style={{ 
                         width: '50px', 
@@ -77,6 +76,7 @@ export default function Dashboard() {
         );
     }
 
+
     if (error) {
         return (
             <Layout>
@@ -84,7 +84,7 @@ export default function Dashboard() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: '100vh'
+                    minHeight: 'calc(100vh - 120px)' // Adjust for new top padding
                 }}>
                     <div style={{ 
                         backgroundColor: 'rgba(0,0,0,0.7)', 
@@ -118,7 +118,7 @@ export default function Dashboard() {
             width: '100%',
             maxWidth: '1200px',
             margin: '0 auto',
-            padding: '20px 40px',
+            padding: '20px', // Removed extra padding on sides
             boxSizing: 'border-box'
         }}>
             <section style={{ 

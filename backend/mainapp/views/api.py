@@ -358,25 +358,34 @@ def create_spotify_wrap(request):
             )
             
             return Response({
-                'message': 'Spotify wrap created successfully',
-                'wrap_id': wrap.id,
-                'data': {
-                    'top_artist': {
-                        'name': top_artist.get('name'),
-                        'genres': top_artist.get('genres', []),
-                        'popularity': top_artist.get('popularity')
-                    },
-                    'top_track': {
-                        'name': top_track.get('name'),
-                        'artists': [artist.get('name') for artist in top_track.get('artists', [])]
-                    },
-                    'top_album': {
-                        'name': top_album.get('name'),
-                        'artists': [artist.get('name') for artist in top_album.get('artists', [])]
-                    },
-                    'top_genres': [genre['name'] for genre in top_genres[:5]]
+    'message': 'Spotify wrap created successfully',
+    'wrap_id': wrap.id,
+    'data': {
+        'top_artist': {
+            'name': top_artist.get('name'),
+            'genres': top_artist.get('genres', []),
+            'popularity': top_artist.get('popularity')
+        },
+        'top_track': {
+            'name': top_track.get('name'),
+            'artists': [artist.get('name') for artist in top_track.get('artists', [])]
+        },
+        'top_album': {
+            'name': top_album.get('name'),
+            'artists': [artist.get('name') for artist in top_album.get('artists', [])]
+        },
+        'top_genres': [genre['name'] for genre in top_genres[:5]],
+        'top_tracks': {  # Add this section
+            'items': [
+                {
+                    'name': track.get('name'),
+                    'artists': track.get('artists', [])
                 }
-            })
+                for track in top_tracks_data.get('items', [])[:5]  # Get only top 5
+            ]
+        }
+    }
+})
 
         except Exception as e:
             logger.error(f"Error creating wrap: {str(e)}")
