@@ -39,4 +39,3 @@ class SpotifyWrapHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SpotifyWrapHistory
         fields = ('id', 'created_at', 'wrap_data', 'year')
-

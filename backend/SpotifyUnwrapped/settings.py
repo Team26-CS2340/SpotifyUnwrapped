@@ -34,6 +34,19 @@ ALLOWED_HOSTS = []
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
 SPOTIFY_REDIRECT_URI = os.getenv('SPOTIFY_REDIRECT_URI', 'http://localhost:8000/api/spotify/callback')
+# settings.py
+
+# Email backend configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Gmail SMTP server (use your email provider)
+EMAIL_PORT = 587  # SMTP port
+EMAIL_USE_TLS = True  # Use TLS for secure connection
+EMAIL_HOST_USER = 'finddiningatl@gmail.com'  # Your email address (sender)
+EMAIL_HOST_PASSWORD = 'rrmkedgifxmudutpw'  # Your email password (or app-specific password if 2FA enabled)
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # Default "from" email for sending emails
+
+# Developer email to receive the feedback
+DEVELOPER_EMAIL = 'spotifyunwrapped515@gmail.com'  # Change this to the email address where you want to receive feedback
 
 # Add logging configuration
 LOGGING = {
@@ -67,6 +80,7 @@ INSTALLED_APPS = [
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:8000",
 ]
 
 # CORS settings
@@ -88,6 +102,7 @@ SPOTIFY_SCOPES = [
 ]
 
 # Session settings
+CSRF_COOKIE_HTTPONLY = False
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 CSRF_COOKIE_SECURE = False    # Set to True in production with HTTPS
@@ -177,3 +192,4 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+

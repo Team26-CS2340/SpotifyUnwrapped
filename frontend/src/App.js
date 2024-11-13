@@ -1,15 +1,17 @@
-// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';  // Add useAuth here
+import { AuthProvider, useAuth } from './context/AuthContext';
 import SpotifyLogin from './components/SpotifyLogin';
 import Dashboard from './components/Dashboard';
 import Home from './components/Home';
 import PersonalityAnalysis from './components/PersonalityAnalysis';
 import SpotifyWrap from './components/wraps/SpotifyWrap';
+import ContactForm from './components/ContactForm';  // Import the ContactForm component
+import ThankYouPage from './components/ThankYouPage';  // Import the ThankYouPage component
+import './App.css';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();  // Using the AuthContext
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -34,8 +36,9 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          <Route path="/personality-analysis" element={<PersonalityAnalysis />} />
           <Route path="/wrap" element={<SpotifyWrap />} />
+          <Route path="/contact" element={<ContactForm />} />  {/* Contact form route */}
+          <Route path="/thank-you" element={<ThankYouPage />} />  {/* Thank You page route */}
         </Routes>
       </Router>
     </AuthProvider>
