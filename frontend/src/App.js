@@ -1,4 +1,4 @@
-// src/App.js
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';  // Add useAuth here
@@ -25,6 +25,7 @@ function App() {
           <Route path="/" element={<SpotifyLogin />} />
           <Route path="/testing" element={<Home />} />
           <Route path="/personality" element={<PersonalityAnalysis />} />
+          <Route path="/home" element={<Home />} />
           <Route 
             path="/dashboard" 
             element={
@@ -40,3 +41,6 @@ function App() {
 }
 
 export default App;
+
+
+
