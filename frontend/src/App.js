@@ -12,7 +12,7 @@ import Top5Songs from './components/wraps/top5songs';
 import TopArtist from './components/wraps/topartist';
 import Top5Genres from './components/wraps/top5genres';
 import TopGenre from './components/wraps/topgenre';
-import Top5Artists from './components/wraps/Top5Artists';
+import Top5Artists from './components/wraps/top5artists';
 import Finish from './components/wraps/finish';
 
 const ProtectedRoute = ({ children }) => {

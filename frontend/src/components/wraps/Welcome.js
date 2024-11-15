@@ -1,4 +1,3 @@
-// src/wraps/Welcome.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
@@ -7,42 +6,34 @@ const Welcome = () => {
     const navigate = useNavigate();
     return (
         <Layout>
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: 'calc(100vh - 90px)',
-                padding: '10px',
-                marginTop: '20px',
-                backgroundColor: 'rgba(0, 0, 0, 0.8)' // Dark background
-            }}>
-                <div style={{
-                    maxWidth: '1200px',
-                    width: '100%',
-                    textAlign: 'center',
+            <div
+                style={{
                     display: 'flex',
-                    flexDirection: 'column',
+                    justifyContent: 'center',
                     alignItems: 'center',
-                    padding: '40px'
-                }}>
-                    <h1 style={{
-                        color: '#1DB954',
-                        fontSize: '3.5em',
-                        marginBottom: '30px',
-                        textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-                    }}>
-                        Welcome to Your Wrapped
-                    </h1>
-
-                    <div style={{
-                        color: 'white',
-                        fontSize: '1.5em',
-                        marginBottom: '40px',
-                        maxWidth: '800px'
-                    }}>
-                        Let's explore your year in music!
-                    </div>
-
+                    minHeight: 'calc(100vh - 90px)',
+                    marginTop: '20px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Dark background
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: '1200px',
+                        width: '100%',
+                        height: '80vh', // Ensures the container is large
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end', // Align content towards the bottom
+                        borderRadius: '15px',
+                        backgroundImage: 'url(/welcome.png)', // Set the background image
+                        backgroundSize: 'cover', // Ensures the image fills the container
+                        backgroundPosition: 'center', // Center the image
+                        backgroundRepeat: 'no-repeat', // Prevent tiling
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.5)', // Optional: Add a shadow for emphasis
+                        overflow: 'hidden',
+                    }}
+                >
                     <button
                         onClick={() => navigate('/topsong')}
                         style={{
@@ -56,7 +47,7 @@ const Welcome = () => {
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
                             boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                            marginTop: '20px'
+                            marginBottom: '30px', // Adjust this value to move the button down
                         }}
                         onMouseOver={(e) => {
                             e.currentTarget.style.transform = 'scale(1.05)';
@@ -76,3 +67,5 @@ const Welcome = () => {
 };
 
 export default Welcome;
+
+

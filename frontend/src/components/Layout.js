@@ -1,4 +1,3 @@
-// src/components/Layout.js
 import React, { createContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -8,6 +7,11 @@ export const ThemeContext = createContext();
 const Layout = ({ children }) => {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isHarrisonFordMode, setIsHarrisonFordMode] = useState(false);
+
+    // Theme colors
+    const themeColors = {
+        accent: isDarkMode ? '#E6E6FA' : '#006400' // Light purple in dark mode, dark green in light mode
+    };
 
     // Initialize theme states from localStorage
     useEffect(() => {
@@ -28,6 +32,7 @@ const Layout = ({ children }) => {
             root.style.setProperty('--text-secondary', '#b3b3b3');
             root.style.setProperty('--text-tertiary', '#888888');
             root.style.setProperty('--border-color', '#404040');
+            root.style.setProperty('--accent-color', '#E6E6FA'); // Light purple for dark mode
         } else {
             document.body.classList.remove('dark-mode');
             root.style.setProperty('--bg-primary', '#ffffff');
@@ -37,6 +42,7 @@ const Layout = ({ children }) => {
             root.style.setProperty('--text-secondary', '#666666');
             root.style.setProperty('--text-tertiary', '#999999');
             root.style.setProperty('--border-color', '#dddddd');
+            root.style.setProperty('--accent-color', '#006400'); // Dark green for light mode
         }
         
         if (harrisonFordEnabled) {
@@ -60,6 +66,7 @@ const Layout = ({ children }) => {
             root.style.setProperty('--text-secondary', '#b3b3b3');
             root.style.setProperty('--text-tertiary', '#888888');
             root.style.setProperty('--border-color', '#404040');
+            root.style.setProperty('--accent-color', '#E6E6FA'); // Light purple for dark mode
         } else {
             document.body.classList.remove('dark-mode');
             localStorage.setItem('dark-mode', 'disabled');
@@ -70,6 +77,7 @@ const Layout = ({ children }) => {
             root.style.setProperty('--text-secondary', '#666666');
             root.style.setProperty('--text-tertiary', '#999999');
             root.style.setProperty('--border-color', '#dddddd');
+            root.style.setProperty('--accent-color', '#006400'); // Dark green for light mode
         }
     };
 
@@ -85,6 +93,16 @@ const Layout = ({ children }) => {
             document.body.classList.remove('harrison-ford-theme');
             localStorage.setItem('harrison-ford-theme', 'disabled');
         }
+    };
+
+    // Get the appropriate background image based on theme states
+    const getBackgroundImage = () => {
+        if (isHarrisonFordMode) {
+            return 'url("/backgroundStarry.jpeg")';
+        } else if (isDarkMode) {
+            return 'url("/backgroundDark.jpeg")';
+        }
+        return 'url("/background.jpeg")';
     };
 
     const headerStyle = {
@@ -107,13 +125,14 @@ const Layout = ({ children }) => {
     };
 
     return (
-        <ThemeContext.Provider value={{ isDarkMode }}>
+        <ThemeContext.Provider value={{ isDarkMode, themeColors }}>
             <div style={{
                 minHeight: '100vh',
-                backgroundImage: 'url("/background.jpeg")',
+                backgroundImage: getBackgroundImage(),
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                backgroundAttachment: 'fixed'
+                backgroundAttachment: 'fixed',
+                transition: 'background-image 0.3s ease'
             }}>
                 {/* Header */}
                 <header style={headerStyle}>
@@ -126,7 +145,13 @@ const Layout = ({ children }) => {
                         alignItems: 'center'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Link to="/Dashboard" style={{ ...navLinkStyle, fontSize: '24px', fontWeight: 'bold', color: '#1DB954' }}>
+                            <Link to="/Dashboard" style={{ 
+                                ...navLinkStyle, 
+                                fontSize: '24px', 
+                                fontWeight: 'bold', 
+                                color: themeColors.accent,
+                                transition: 'color 0.3s ease'
+                            }}>
                                 Spotify Wrapped
                             </Link>
                             <nav style={{ marginLeft: '40px' }}>
@@ -159,11 +184,11 @@ const Layout = ({ children }) => {
 
                 {/* Main Content */}
                 <main style={{ 
-                    paddingTop: '120px', // Increased padding to prevent content overlap
+                    paddingTop: '120px',
                     backgroundColor: isDarkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.7)',
                     minHeight: '100vh',
                     position: 'relative',
-                    overflow: 'hidden' // Prevents horizontal scrollbar
+                    overflow: 'hidden'
                 }}>
                     {children}
                 </main>

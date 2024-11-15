@@ -1,4 +1,3 @@
-// src/components/Dashboard.js
 import React, { useState, useEffect } from 'react';
 import Layout from './Layout';
 
@@ -7,6 +6,14 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
+
+    // Define theme-aware colors using CSS variables
+    const themeColors = {
+        accent: 'var(--theme-accent)',
+        buttonGradient: 'var(--button-gradient)',
+        buttonBg: 'var(--button-bg, #17093a)',  // defaults to black if variable not set
+        buttonText: 'var(--button-text, #ffffff)'  // defaults to white if variable not set
+    };
 
     // Fetch user data from the backend
     const fetchUserData = async () => {
@@ -54,6 +61,7 @@ export default function Dashboard() {
             setRefreshing(false);
         }
     };
+
     if (loading) {
         return (
             <Layout>
@@ -61,12 +69,12 @@ export default function Dashboard() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minHeight: 'calc(100vh - 120px)' // Adjust for new top padding
+                    minHeight: 'calc(100vh - 120px)'
                 }}>
                     <div style={{ 
                         width: '50px', 
                         height: '50px', 
-                        border: '3px solid #1DB954', 
+                        border: `3px solid ${themeColors.accent}`, 
                         borderTopColor: 'transparent', 
                         borderRadius: '50%', 
                         animation: 'spin 1s linear infinite' 
@@ -76,7 +84,6 @@ export default function Dashboard() {
         );
     }
 
-
     if (error) {
         return (
             <Layout>
@@ -84,7 +91,7 @@ export default function Dashboard() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minHeight: 'calc(100vh - 120px)' // Adjust for new top padding
+                    minHeight: 'calc(100vh - 120px)'
                 }}>
                     <div style={{ 
                         backgroundColor: 'rgba(0,0,0,0.7)', 
@@ -97,12 +104,17 @@ export default function Dashboard() {
                         <button
                             onClick={() => window.location.href = '/'}
                             style={{
-                                backgroundColor: '#1DB954',
-                                color: 'white',
+                                backgroundColor: themeColors.buttonBg,
+                                color: themeColors.buttonText,
                                 border: 'none',
                                 padding: '10px 20px',
                                 borderRadius: '20px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s, opacity 0.2s',
+                                ':hover': {
+                                    transform: 'translateY(-1px)',
+                                    opacity: 0.9
+                                }
                             }}
                         >
                             Reconnect to Spotify
@@ -118,7 +130,7 @@ export default function Dashboard() {
             width: '100%',
             maxWidth: '1200px',
             margin: '0 auto',
-            padding: '20px', // Removed extra padding on sides
+            padding: '20px',
             boxSizing: 'border-box'
         }}>
             <section style={{ 
@@ -128,18 +140,23 @@ export default function Dashboard() {
                 marginBottom: '20px',
                 color: 'var(--text-primary)'
             }}>
-                <h2 style={{ color: '#1DB954', marginTop: 0 }}>{userData?.spotify_profile?.display_name}'s Stats</h2>
+                <h2 style={{ color: themeColors.accent, marginTop: 0 }}>{userData?.spotify_profile?.display_name}'s Stats</h2>
                 <button
                     onClick={handleRefreshData}
                     disabled={refreshing}
                     style={{
-                        backgroundColor: '#1DB954',
-                        color: 'white',
+                        backgroundColor: themeColors.buttonBg,
+                        color: themeColors.buttonText,
                         border: 'none',
                         padding: '10px 20px',
                         borderRadius: '20px',
                         cursor: refreshing ? 'not-allowed' : 'pointer',
-                        opacity: refreshing ? 0.7 : 1
+                        opacity: refreshing ? 0.7 : 1,
+                        transition: 'transform 0.2s, opacity 0.2s',
+                        ':hover': {
+                            transform: 'translateY(-1px)',
+                            opacity: 0.9
+                        }
                     }}
                 >
                     {refreshing ? 'Refreshing...' : 'Refresh Data'}
@@ -151,7 +168,7 @@ export default function Dashboard() {
                     marginTop: '20px'
                 }}>
                     <div>
-                        <h3 style={{ color: '#1DB954', marginTop: 0 }}>Saved Tracks</h3>
+                        <h3 style={{ color: themeColors.accent, marginTop: 0 }}>Saved Tracks</h3>
                         <p style={{ 
                             fontSize: '24px',
                             fontWeight: 'bold',
@@ -161,7 +178,7 @@ export default function Dashboard() {
                         </p>
                     </div>
                     <div>
-                        <h3 style={{ color: '#1DB954', marginTop: 0 }}>Saved Albums</h3>
+                        <h3 style={{ color: themeColors.accent, marginTop: 0 }}>Saved Albums</h3>
                         <p style={{ 
                             fontSize: '24px',
                             fontWeight: 'bold',
@@ -171,7 +188,7 @@ export default function Dashboard() {
                         </p>
                     </div>
                     <div>
-                        <h3 style={{ color: '#1DB954', marginTop: 0 }}>Playlists</h3>
+                        <h3 style={{ color: themeColors.accent, marginTop: 0 }}>Playlists</h3>
                         <p style={{ 
                             fontSize: '24px',
                             fontWeight: 'bold',
@@ -181,7 +198,7 @@ export default function Dashboard() {
                         </p>
                     </div>
                     <div>
-                        <h3 style={{ color: '#1DB954', marginTop: 0 }}>Following</h3>
+                        <h3 style={{ color: themeColors.accent, marginTop: 0 }}>Following</h3>
                         <p style={{ 
                             fontSize: '24px',
                             fontWeight: 'bold',
@@ -199,7 +216,7 @@ export default function Dashboard() {
                 borderRadius: '8px',
                 marginBottom: '20px'
             }}>
-                <h2 style={{ color: '#1DB954', marginTop: 0 }}>Top Artists</h2>
+                <h2 style={{ color: themeColors.accent, marginTop: 0 }}>Top Artists</h2>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {userData?.spotify_data?.top_artists?.items?.slice(0, 5).map((artist, index) => (
                         <li key={artist.id} style={{ 
@@ -210,7 +227,7 @@ export default function Dashboard() {
                             alignItems: 'center'
                         }}>
                             <strong style={{ 
-                                color: '#1DB954', 
+                                color: themeColors.accent, 
                                 marginRight: '15px',
                                 fontSize: '20px'
                             }}>#{index + 1}</strong>
@@ -239,7 +256,7 @@ export default function Dashboard() {
                 padding: '20px',
                 borderRadius: '8px'
             }}>
-                <h2 style={{ color: '#1DB954', marginTop: 0 }}>Recently Played</h2>
+                <h2 style={{ color: themeColors.accent, marginTop: 0 }}>Recently Played</h2>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {userData?.spotify_data?.recently_played?.items?.slice(0, 5).map((item) => (
                         <li key={`${item.track.id}-${item.played_at}`} style={{

@@ -1,4 +1,3 @@
-// src/components/wraps/Top5Artists.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
@@ -7,12 +6,46 @@ function Top5Artists() {
     const navigate = useNavigate();
     const wrapData = JSON.parse(localStorage.getItem('wrapData'));
     
-    // Using hardcoded data as fallback
-    const topArtists = [
+    if (!wrapData || !wrapData.data) {
+        navigate('/wrap');
+        return null;
+    }
+
+    // Create a list of top 5 artists with the main top_artist first
+    const topArtists = [];
+    
+    // Add the main top artist first
+    if (wrapData.data.top_artist) {
+        topArtists.push(wrapData.data.top_artist);
+    }
+
+    // Add additional artists from top_tracks (getting unique artists)
+    if (wrapData.data.top_tracks && wrapData.data.top_tracks.items) {
+        const seenArtists = new Set([wrapData.data.top_artist?.name]); // Keep track of artists we've already added
+
+        wrapData.data.top_tracks.items.forEach(track => {
+            if (track.artists && track.artists.length > 0) {
+                track.artists.forEach(artist => {
+                    // Only add if we haven't seen this artist before and we have less than 5 artists
+                    if (!seenArtists.has(artist.name) && topArtists.length < 5) {
+                        seenArtists.add(artist.name);
+                        topArtists.push({
+                            name: artist.name,
+                            genres: artist.genres || [],  // Use artist genres if available
+                            popularity: artist.popularity || 85  // Default popularity if not available
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // Fill remaining slots with hardcoded data if needed
+    const defaultArtists = [
         {
-            name: "The Weeknd",
-            genres: ["canadian contemporary r&b", "canadian pop", "pop"],
-            popularity: 96
+            name: "A.R. Rahman",
+            genres: ["filmi"],
+            popularity: 90
         },
         {
             name: "Taylor Swift",
@@ -20,25 +53,24 @@ function Top5Artists() {
             popularity: 95
         },
         {
-            name: "Tory Lanez",
-            genres: ["canadian hip hop", "canadian trap", "melodic rap", "pop rap", "r&b", "rap", "trap"],
-            popularity: 90
-        },
-        {
-            name: "Metro Boomin",
-            genres: ["rap"],
+            name: "Diljit Dosanjh",
+            genres: ["filmi", "modern bollywood", "punjabi pop"],
             popularity: 88
         },
         {
-            name: "Travis Scott",
-            genres: ["rap", "slap house"],
-            popularity: 92
+            name: "Shankar-Ehsaan-Loy",
+            genres: ["filmi", "modern bollywood"],
+            popularity: 87
         }
     ];
 
-    if (!wrapData) {
-        navigate('/wrap');
-        return null;
+    // Add default artists if we don't have enough
+    let i = 0;
+    while (topArtists.length < 5 && i < defaultArtists.length) {
+        if (!topArtists.find(artist => artist.name === defaultArtists[i].name)) {
+            topArtists.push(defaultArtists[i]);
+        }
+        i++;
     }
 
     const getGradientBackground = (index) => {
@@ -199,3 +231,4 @@ function Top5Artists() {
 }
 
 export default Top5Artists;
+
