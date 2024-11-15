@@ -2,113 +2,270 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 
-const SavedWraps = () => {
-  const [wraps, setWraps] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+export default function SavedWraps() {
+    const [wraps, setWraps] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchUserWraps();
-  }, []);
-  const fetchUserWraps = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:8000/api/wraps/');
-      const data = await response.json();
-      console.log('Fetched wraps data:', data);
-      if (response.ok) {
-        setWraps(data);
-      } else {
-        console.error('Error fetching user wraps:', data);
-        setError(`Error fetching user wraps: ${data.error}`);
+    useEffect(() => {
+        fetchWraps();
+    }, []);
+
+    const fetchWraps = async () => {
+        try {
+            console.log('Fetching wraps...');
+            const response = await fetch('http://localhost:8000/api/user/wraps/', {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                throw new Error(`Failed to fetch wraps: ${response.status} ${errorText}`);
+            }
+            
+            const data = await response.json();
+            console.log('Fetched wraps data:', data);
+            setWraps(data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching wraps:', err);
+            setError(err.message || 'Failed to load wraps');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleWrapClick = async (wrapId) => {
+      try {
+          const response = await fetch(`http://localhost:8000/api/user/wrap/${wrapId}/`, {
+              credentials: 'include',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+              }
+          });
+          
+          if (!response.ok) {
+              throw new Error(`Failed to fetch wrap details: ${response.status}`);
+          }
+          
+          const wrapData = await response.json();
+          console.log('Original Wrap Data:', wrapData);
+  
+          // Helper function to extract artist names
+          const extractArtists = (artistData) => {
+              if (!artistData) return [];
+              if (typeof artistData === 'string') return [artistData];
+              if (Array.isArray(artistData)) {
+                  return artistData.map(artist => {
+                      if (typeof artist === 'string') return artist;
+                      if (typeof artist === 'object' && artist.name) return artist.name;
+                      return '';
+                  }).filter(name => name);
+              }
+              if (typeof artistData === 'object' && artistData.name) return [artistData.name];
+              return [];
+          };
+  
+          // Format the data
+          const formattedData = {
+              message: 'Spotify wrap loaded successfully',
+              wrap_id: wrapId,
+              data: {
+                  top_artist: {
+                      name: wrapData.top_artist?.name || '',
+                      genres: wrapData.top_artist?.genres || [],
+                      popularity: wrapData.top_artist?.popularity || 0
+                  },
+                  top_track: {
+                      name: wrapData.top_track?.name || '',
+                      artists: extractArtists(wrapData.top_track?.artists)
+                  },
+                  top_album: {
+                      name: wrapData.top_album?.name || '',
+                      artists: extractArtists(wrapData.top_album?.artists)
+                  },
+                  top_genres: wrapData.top_genres?.map(genre => 
+                      typeof genre === 'object' ? genre.name : genre
+                  ) || [],
+                  top_tracks: {
+                      items: wrapData.top_tracks?.items?.map(track => ({
+                          name: track.name || '',
+                          artists: extractArtists(track.artists)
+                      })) || []
+                  }
+              }
+          };
+  
+          console.log('Formatted Data for Welcome Page:', formattedData);
+          localStorage.setItem('wrapData', JSON.stringify(formattedData));
+          navigate('/welcome');
+  
+      } catch (err) {
+          console.error('Error loading wrap:', err);
+          setError(err.message || 'Failed to load wrap');
       }
-    } catch (error) {
-      console.error('Error fetching user wraps:', error);
-      setError('Failed to fetch user wraps');
-    } finally {
-      setLoading(false);
-    }
   };
 
-  if (loading) {
-    return (
-      <Layout>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 90px)' }}>
-          <div className="lds-ring">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+    if (loading) {
+        return (
+            <Layout>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: 'calc(100vh - 120px)'
+                }}>
+                    <div style={{ 
+                        width: '50px', 
+                        height: '50px', 
+                        border: '3px solid #1DB954', 
+                        borderTopColor: 'transparent', 
+                        borderRadius: '50%', 
+                        animation: 'spin 1s linear infinite' 
+                    }} />
+                </div>
+            </Layout>
+        );
+    }
 
-  if (error) {
-    return (
-      <Layout>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 90px)' }}>
-          <div style={{ color: 'red', fontSize: '1.2rem' }}>Error: {error}</div>
-        </div>
-      </Layout>
-    );
-  }
+    if (error) {
+        return (
+            <Layout>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: 'calc(100vh - 120px)'
+                }}>
+                    <div style={{ 
+                        backgroundColor: 'rgba(0,0,0,0.7)', 
+                        padding: '20px', 
+                        borderRadius: '10px',
+                        color: 'white',
+                        textAlign: 'center'
+                    }}>
+                        <p style={{ color: '#ff4444', marginBottom: '20px' }}>{error}</p>
+                        <button
+                            onClick={fetchWraps}
+                            style={{
+                                backgroundColor: '#1DB954',
+                                color: 'white',
+                                border: 'none',
+                                padding: '10px 20px',
+                                borderRadius: '20px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
 
-  return (
-    <Layout>
-      <div style={{ padding: '2rem' }}>
-        <h1 style={{ color: '#1DB954', marginBottom: '2rem' }}>Your Saved Spotify Wraps</h1>
-        {loading && (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 90px)' }}>
-            <div className="lds-ring">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
+    return (
+        <Layout>
+            <div style={{
+                maxWidth: '1200px',
+                margin: '0 auto',
+                padding: '20px'
+            }}>
+                <h1 style={{
+                    color: '#1DB954',
+                    marginBottom: '30px',
+                    textAlign: 'center'
+                }}>
+                    Your Saved Wraps
+                </h1>
+                
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '20px',
+                    padding: '20px'
+                }}>
+                    {wraps.length === 0 ? (
+                        <div style={{
+                            gridColumn: '1 / -1',
+                            textAlign: 'center',
+                            color: 'white',
+                            padding: '40px'
+                        }}>
+                            No wraps found. Create your first wrap!
+                        </div>
+                    ) : (
+                        wraps.map((wrap) => (
+                            <div
+                                key={wrap.id}
+                                onClick={() => handleWrapClick(wrap.id)}
+                                style={{
+                                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                    borderRadius: '10px',
+                                    padding: '20px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    border: '1px solid rgba(29, 185, 84, 0.3)',
+                                    color: 'white',
+                                    transform: 'translateY(0)',
+                                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-5px)';
+                                    e.currentTarget.style.boxShadow = '0 5px 15px rgba(29, 185, 84, 0.3)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+                                }}
+                            >
+                                <div style={{
+                                    fontSize: '1.5em',
+                                    color: '#1DB954',
+                                    marginBottom: '15px'
+                                }}>
+                                    Wrap {wrap.year}
+                                </div>
+                                
+                                <div style={{
+                                    marginBottom: '10px',
+                                    fontSize: '0.9em',
+                                    color: '#b3b3b3'
+                                }}>
+                                    Created: {new Date(wrap.created_at).toLocaleDateString()}
+                                </div>
+                                
+                                <div style={{ marginBottom: '15px' }}>
+                                    <div style={{ fontWeight: 'bold' }}>Top Artist</div>
+                                    <div>{wrap.top_artist.name}</div>
+                                </div>
+                                
+                                <div style={{ marginBottom: '15px' }}>
+                                    <div style={{ fontWeight: 'bold' }}>Top Track</div>
+                                    <div>{wrap.top_track.name}</div>
+                                    <div style={{ fontSize: '0.9em', color: '#b3b3b3' }}>
+                                        by {wrap.top_track.artists.join(', ')}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div style={{ fontWeight: 'bold' }}>Genres</div>
+                                    <div>{wrap.genre_count} unique genres</div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
-          </div>
-        )}
-        {error && (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 90px)' }}>
-            <div style={{ color: 'red', fontSize: '1.2rem' }}>Error: {error}</div>
-          </div>
-        )}
-        {!loading && !error && wraps.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-            {wraps.map((wrap) => (
-              <div
-                key={wrap.id}
-                style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                  padding: '1.5rem',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-                onClick={() => navigate(`/wraps/${wrap.id}`)}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                <h2 style={{ color: '#1DB954', marginBottom: '0.5rem' }}>{wrap.year} Wrap</h2>
-                <p style={{ color: 'white', marginBottom: '0.5rem' }}>Top Artist: {wrap.top_artist.name}</p>
-                <p style={{ color: 'white' }}>Created: {new Date(wrap.created_at).toLocaleDateString()}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        {!loading && !error && wraps.length === 0 && (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'calc(100vh - 90px)' }}>
-            <div style={{ color: 'white', fontSize: '1.2rem' }}>No saved wraps found.</div>
-          </div>
-        )}
-      </div>
-    </Layout>
-  );}
-
-export default SavedWraps;
+        </Layout>
+    );
+}

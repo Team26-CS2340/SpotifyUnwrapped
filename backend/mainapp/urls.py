@@ -27,6 +27,8 @@ api_urlpatterns = [
     path('api/wraps/create/', create_spotify_wrap, name='create_wrap'),
     path('api/wraps/', get_user_wraps, name='get_wraps'),
     path('api/wraps/<int:wrap_id>/', get_wrap_detail, name='get_wrap_detail'),
+    path('api/user/wraps/', get_user_wraps, name='get-user-wraps'),
+    path('api/user/wrap/<int:wrap_id>/', get_wrap_detail, name='get-wrap-detail'),
 
 ]
 

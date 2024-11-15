@@ -450,6 +450,7 @@ def get_wrap_detail(request, wrap_id):
     try:
         profile = request.user.userprofile
         wrap = SpotifyWrapHistory.objects.get(id=wrap_id, user_profile=profile)
+
         
         # Process genres to include counts
         top_genres_with_counts = wrap.top_genres if isinstance(wrap.top_genres, list) else []
