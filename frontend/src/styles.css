@@ -124,3 +124,148 @@ input[type="checkbox"]:checked + span:before {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* src/styles.css */
+
+.fade-enter {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.fade-exit {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: opacity 300ms ease, transform 300ms ease;
+
+    /* src/styles.css */
+
+/* Full-page wrapper for consistent styling across transitions */
+.full-page {
+    min-height: 100vh;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--background-color, white); /* Ensure background is always visible */
+    overflow: hidden; /* Prevent any overflow during animations */
+  }
+  
+  /* Slide-in from the right for new pages */
+  .page-slide-enter {
+    transform: translateX(100%);
+  }
+  .page-slide-enter-active {
+    transform: translateX(0);
+    transition: transform 500ms ease-in-out;
+  }
+  
+  /* Slide-out to the left for exiting pages */
+  .page-slide-exit {
+    transform: translateX(0);
+  }
+  .page-slide-exit-active {
+    transform: translateX(-100%);
+    transition: transform 500ms ease-in-out;
+  }
+  
+}
+
+/* Fade transition */
+.page-fade-enter {
+    opacity: 0;
+  }
+  
+  .page-fade-enter-active {
+    opacity: 1;
+    transition: opacity 500ms ease-in-out;
+  }
+  
+  .page-fade-exit {
+    opacity: 1;
+  }
+  
+  .page-fade-exit-active {
+    opacity: 0;
+    transition: opacity 500ms ease-in-out;
+  }
+  
+  /* Slide transition */
+  .page-slide-enter {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  
+  .page-slide-enter-active {
+    transform: translateX(0);
+    opacity: 1;
+    transition: transform 500ms ease-in-out, opacity 500ms ease-in-out;
+  }
+  
+  .page-slide-exit {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  
+  .page-slide-exit-active {
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: transform 500ms ease-in-out, opacity 500ms ease-in-out;
+  }
+  
+  /* Blur transition */
+  .page-blur-enter {
+    filter: blur(10px);
+    opacity: 0;
+  }
+  
+  .page-blur-enter-active {
+    filter: blur(0px);
+    opacity: 1;
+    transition: filter 500ms ease-in-out, opacity 500ms ease-in-out;
+  }
+  
+  .page-blur-exit {
+    filter: blur(0px);
+    opacity: 1;
+  }
+  
+  .page-blur-exit-active {
+    filter: blur(10px);
+    opacity: 0;
+    transition: filter 500ms ease-in-out, opacity 500ms ease-in-out;
+  }
+  
+  /* Flip transition */
+  .page-flip-enter {
+    transform: rotateY(90deg);
+    opacity: 0;
+  }
+  
+  .page-flip-enter-active {
+    transform: rotateY(0deg);
+    opacity: 1;
+    transition: transform 500ms ease-in-out, opacity 500ms ease-in-out;
+  }
+  
+  .page-flip-exit {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  
+  .page-flip-exit-active {
+    transform: rotateY(-90deg);
+    opacity: 0;
+    transition: transform 500ms ease-in-out, opacity 500ms ease-in-out;
+  }
+  
