@@ -169,6 +169,7 @@ export default function Dashboard() {
             boxSizing: 'border-box'
         }}>
             {/* Your existing Stats section remains the same */}
+            
             <section style={{ 
                 backgroundColor: 'var(--bg-secondary)',
                 padding: '20px',
@@ -240,6 +241,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </section>
+            
 
             {/* Your existing Top Artists section remains the same */}
             <section style={{ 

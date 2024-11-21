@@ -1,4 +1,3 @@
-// src/wraps/Top5Songs.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
@@ -40,7 +39,7 @@ const Top5Songs = () => {
                         color: 'white',
                         width: '80%',
                         maxWidth: '700px',
-                        marginBottom: '40px' // Add space before button
+                        marginBottom: '40px'
                     }}>
                         <h1 style={{
                             color: '#1DB954',
@@ -90,7 +89,7 @@ const Top5Songs = () => {
                                         color: '#b3b3b3',
                                         fontSize: '1em'
                                     }}>
-                                        by {track.artists?.map(artist => artist.name).join(', ')}
+                                        by {track.artists?.join(', ')}
                                     </div>
                                 </div>
                             </div>

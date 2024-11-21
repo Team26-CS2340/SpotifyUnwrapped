@@ -15,6 +15,7 @@ import json
 from ..utils.spotify import SpotifyAPI
 import google.generativeai as genai
 import os
+from django.views.decorators.csrf import ensure_csrf_cookie
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -443,7 +444,7 @@ def get_user_wraps(request):
             'detail': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['GET'])
+@api_view(['GET', 'DELETE'])
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def get_wrap_detail(request, wrap_id):
@@ -451,7 +452,10 @@ def get_wrap_detail(request, wrap_id):
         profile = request.user.userprofile
         wrap = SpotifyWrapHistory.objects.get(id=wrap_id, user_profile=profile)
 
-        
+        if request.method == 'DELETE':
+            wrap.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
         # Process genres to include counts
         top_genres_with_counts = wrap.top_genres if isinstance(wrap.top_genres, list) else []
         
@@ -523,7 +527,8 @@ def get_wrap_detail(request, wrap_id):
                 ],
                 'total': wrap.top_followed_artists.get('artists', {}).get('total', 0)
             },
-            'top_genres': top_genres_with_counts
+            'top_genres': top_genres_with_counts,
+            'is_public': getattr(wrap, 'is_public', False)
         }
         
         return Response(response_data)
@@ -533,9 +538,9 @@ def get_wrap_detail(request, wrap_id):
             'error': 'Wrap not found'
         }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        logger.error(f"Error fetching wrap detail: {str(e)}")
+        logger.error(f"Error processing wrap request: {str(e)}")
         return Response({
-            'error': 'Failed to fetch wrap detail',
+            'error': 'Failed to process wrap request',
             'detail': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -620,3 +625,26 @@ def refresh_spotify_data(request):
 
 
 
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+@ensure_csrf_cookie
+def toggle_wrap_visibility(request, wrap_id):
+    try:
+        profile = request.user.userprofile
+        wrap = SpotifyWrapHistory.objects.get(id=wrap_id, user_profile=profile)
+        
+        wrap.is_public = not wrap.is_public
+        wrap.save()
+        
+        return Response({
+            'is_public': wrap.is_public
+        }, status=status.HTTP_200_OK)
+    except SpotifyWrapHistory.DoesNotExist:
+        return Response({
+            'error': 'Wrap not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

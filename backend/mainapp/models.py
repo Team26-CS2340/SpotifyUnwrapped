@@ -38,6 +38,7 @@ class SpotifyWrapHistory(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     year = models.IntegerField()
+    is_public = models.BooleanField(default=False)
     
     # Wrap Data - exactly as requested
     top_artists = models.JSONField(default=dict, help_text='List of top artists')

@@ -14,7 +14,6 @@ export default function SavedWraps() {
 
     const fetchWraps = async () => {
         try {
-            console.log('Fetching wraps...');
             const response = await fetch('http://localhost:8000/api/user/wraps/', {
                 credentials: 'include',
                 headers: {
@@ -23,16 +22,12 @@ export default function SavedWraps() {
                 }
             });
             
-            console.log('Response status:', response.status);
-            
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('Error response:', errorText);
                 throw new Error(`Failed to fetch wraps: ${response.status} ${errorText}`);
             }
             
             const data = await response.json();
-            console.log('Fetched wraps data:', data);
             setWraps(data);
             setError(null);
         } catch (err) {
@@ -44,76 +39,145 @@ export default function SavedWraps() {
     };
 
     const handleWrapClick = async (wrapId) => {
-      try {
-          const response = await fetch(`http://localhost:8000/api/user/wrap/${wrapId}/`, {
-              credentials: 'include',
-              headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json',
-              }
-          });
-          
-          if (!response.ok) {
-              throw new Error(`Failed to fetch wrap details: ${response.status}`);
-          }
-          
-          const wrapData = await response.json();
-          console.log('Original Wrap Data:', wrapData);
-  
-          // Helper function to extract artist names
-          const extractArtists = (artistData) => {
-              if (!artistData) return [];
-              if (typeof artistData === 'string') return [artistData];
-              if (Array.isArray(artistData)) {
-                  return artistData.map(artist => {
-                      if (typeof artist === 'string') return artist;
-                      if (typeof artist === 'object' && artist.name) return artist.name;
-                      return '';
-                  }).filter(name => name);
-              }
-              if (typeof artistData === 'object' && artistData.name) return [artistData.name];
-              return [];
-          };
-  
-          // Format the data
-          const formattedData = {
-              message: 'Spotify wrap loaded successfully',
-              wrap_id: wrapId,
-              data: {
-                  top_artist: {
-                      name: wrapData.top_artist?.name || '',
-                      genres: wrapData.top_artist?.genres || [],
-                      popularity: wrapData.top_artist?.popularity || 0
-                  },
-                  top_track: {
-                      name: wrapData.top_track?.name || '',
-                      artists: extractArtists(wrapData.top_track?.artists)
-                  },
-                  top_album: {
-                      name: wrapData.top_album?.name || '',
-                      artists: extractArtists(wrapData.top_album?.artists)
-                  },
-                  top_genres: wrapData.top_genres?.map(genre => 
-                      typeof genre === 'object' ? genre.name : genre
-                  ) || [],
-                  top_tracks: {
-                      items: wrapData.top_tracks?.items?.map(track => ({
-                          name: track.name || '',
-                          artists: extractArtists(track.artists)
-                      })) || []
-                  }
-              }
-          };
-  
-          console.log('Formatted Data for Welcome Page:', formattedData);
-          localStorage.setItem('wrapData', JSON.stringify(formattedData));
-          navigate('/welcome');
-  
-      } catch (err) {
-          console.error('Error loading wrap:', err);
-          setError(err.message || 'Failed to load wrap');
-      }
-  };
+        try {
+            const response = await fetch(`http://localhost:8000/api/user/wrap/${wrapId}/`, {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch wrap details: ${response.status}`);
+            }
+            
+            const wrapData = await response.json();
+            
+            const extractArtistNames = (artists) => {
+                return (artists || []).map(artist => {
+                    if (typeof artist === 'object' && artist.name) {
+                        return artist.name;
+                    } else if (typeof artist === 'string') {
+                        return artist;
+                    } else {
+                        return '';
+                    }
+                });
+            };
+    
+            const formattedData = {
+                message: 'Spotify wrap loaded successfully',
+                wrap_id: wrapId,
+                data: {
+                    top_artist: {
+                        name: wrapData.top_artist?.name || '',
+                        genres: wrapData.top_artist?.genres || [],
+                        popularity: wrapData.top_artist?.popularity || 0
+                    },
+                    top_track: {
+                        name: wrapData.top_track?.name || '',
+                        artists: extractArtistNames(wrapData.top_track?.artists)
+                    },
+                    top_album: {
+                        name: wrapData.top_album?.name || '',
+                        artists: extractArtistNames(wrapData.top_album?.artists)
+                    },
+                    top_genres: wrapData.top_genres?.map(genre => 
+                        typeof genre === 'object' ? genre.name : genre
+                    ) || [],
+                    top_tracks: {
+                        items: wrapData.top_tracks?.items?.map(track => ({
+                            name: track.name || '',
+                            artists: extractArtistNames(track.artists)
+                        })) || []
+                    },
+                    top_artists: wrapData.top_artists || { items: [] }
+                }
+            };
+    
+            localStorage.setItem('wrapData', JSON.stringify(formattedData));
+            navigate('/welcome');
+        } catch (err) {
+            console.error('Error loading wrap:', err);
+            setError(err.message || 'Failed to load wrap');
+        }
+    };
+
+    const handleDeleteWrap = async (wrapId, e) => {
+        e.stopPropagation();
+        if (window.confirm('Are you sure you want to delete this wrap?')) {
+            try {
+                const csrfToken = document.cookie.split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1];
+    
+                const response = await fetch(`http://localhost:8000/api/user/wrap/${wrapId}/`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to delete wrap: ${response.status}`);
+                }
+                
+                setWraps(wraps.filter(wrap => wrap.id !== wrapId));
+            } catch (err) {
+                console.error('Error deleting wrap:', err);
+                setError(err.message || 'Failed to delete wrap');
+            }
+        }
+    };
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    const handleToggleVisibility = async (wrapId, currentVisibility, e) => {
+        e.stopPropagation();
+        try {
+            const csrfToken = getCookie('csrftoken');
+            const response = await fetch(`http://localhost:8000/api/user/wrap/${wrapId}/toggle-visibility/`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ is_public: !currentVisibility })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to update visibility: ${response.status}`);
+            }
+            
+            setWraps(wraps.map(wrap => 
+                wrap.id === wrapId 
+                    ? { ...wrap, is_public: !wrap.is_public }
+                    : wrap
+            ));
+        } catch (err) {
+            console.error('Error updating visibility:', err);
+            setError(err.message || 'Failed to update visibility');
+        }
+    };
 
     if (loading) {
         return (
@@ -257,9 +321,46 @@ export default function SavedWraps() {
                                     </div>
                                 </div>
                                 
-                                <div>
+                                <div style={{ marginBottom: '15px' }}>
                                     <div style={{ fontWeight: 'bold' }}>Genres</div>
                                     <div>{wrap.genre_count} unique genres</div>
+                                </div>
+
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    marginTop: '15px',
+                                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                                    paddingTop: '15px'
+                                }}>
+                                    <button
+                                        onClick={(e) => handleToggleVisibility(wrap.id, wrap.is_public, e)}
+                                        style={{
+                                            backgroundColor: wrap.is_public ? 'rgba(29, 185, 84, 0.2)' : 'transparent',
+                                            border: '1px solid #1DB954',
+                                            color: '#1DB954',
+                                            padding: '5px 10px',
+                                            borderRadius: '15px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.8em'
+                                        }}
+                                    >
+                                        {wrap.is_public ? 'Public' : 'Private'}
+                                    </button>
+                                    <button
+                                        onClick={(e) => handleDeleteWrap(wrap.id, e)}
+                                        style={{
+                                            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                                            border: '1px solid #ff4444',
+                                            color: '#ff4444',
+                                            padding: '5px 10px',
+                                            borderRadius: '15px',
+                                            cursor: 'pointer',
+                                            fontSize: '0.8em'
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
                                 </div>
                             </div>
                         ))

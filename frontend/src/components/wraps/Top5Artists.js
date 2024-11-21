@@ -11,36 +11,23 @@ function Top5Artists() {
         return null;
     }
 
-    // Create a list of top 5 artists with the main top_artist first
     const topArtists = [];
     
-    // Add the main top artist first
     if (wrapData.data.top_artist) {
         topArtists.push(wrapData.data.top_artist);
     }
 
-    // Add additional artists from top_tracks (getting unique artists)
-    if (wrapData.data.top_tracks && wrapData.data.top_tracks.items) {
-        const seenArtists = new Set([wrapData.data.top_artist?.name]); // Keep track of artists we've already added
-
-        wrapData.data.top_tracks.items.forEach(track => {
-            if (track.artists && track.artists.length > 0) {
-                track.artists.forEach(artist => {
-                    // Only add if we haven't seen this artist before and we have less than 5 artists
-                    if (!seenArtists.has(artist.name) && topArtists.length < 5) {
-                        seenArtists.add(artist.name);
-                        topArtists.push({
-                            name: artist.name,
-                            genres: artist.genres || [],  // Use artist genres if available
-                            popularity: artist.popularity || 85  // Default popularity if not available
-                        });
-                    }
-                });
+    if (wrapData.data.top_artists?.items) {
+        const seenArtists = new Set([wrapData.data.top_artist?.name]);
+        
+        wrapData.data.top_artists.items.forEach(artist => {
+            if (!seenArtists.has(artist.name) && topArtists.length < 5) {
+                seenArtists.add(artist.name);
+                topArtists.push(artist);
             }
         });
     }
 
-    // Fill remaining slots with hardcoded data if needed
     const defaultArtists = [
         {
             name: "A.R. Rahman",
@@ -64,7 +51,6 @@ function Top5Artists() {
         }
     ];
 
-    // Add default artists if we don't have enough
     let i = 0;
     while (topArtists.length < 5 && i < defaultArtists.length) {
         if (!topArtists.find(artist => artist.name === defaultArtists[i].name)) {

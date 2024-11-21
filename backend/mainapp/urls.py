@@ -7,7 +7,8 @@ from .views.api import (  # Explicitly import all api views
     get_personality_analysis,
     create_spotify_wrap,
     get_user_wraps,
-    get_wrap_detail
+    get_wrap_detail,
+    toggle_wrap_visibility
 )
 from .views.auth import register, sign_in, sign_out
 from .views import api, testapi
@@ -29,6 +30,7 @@ api_urlpatterns = [
     path('api/wraps/<int:wrap_id>/', get_wrap_detail, name='get_wrap_detail'),
     path('api/user/wraps/', get_user_wraps, name='get-user-wraps'),
     path('api/user/wrap/<int:wrap_id>/', get_wrap_detail, name='get-wrap-detail'),
+    path('api/user/wrap/<int:wrap_id>/toggle-visibility/', toggle_wrap_visibility, name='toggle-wrap-visibility'),
 
 ]
 

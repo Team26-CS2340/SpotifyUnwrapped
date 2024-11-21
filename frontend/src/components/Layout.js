@@ -132,6 +132,7 @@ const Layout = ({ children }) => {
                             <nav style={{ marginLeft: '40px' }}>
                                 <Link to="/personality" style={navLinkStyle}>Personality</Link>
                                 <Link to="/wrap" style={navLinkStyle}>Your Wrap</Link>
+                                <Link to="/savedwraps" style={navLinkStyle}>Saved Wraps</Link>
                             </nav>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', color: isDarkMode ? 'white' : '#333' }}>

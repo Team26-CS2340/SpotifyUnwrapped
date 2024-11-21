@@ -38,15 +38,47 @@ function SpotifyWrap() {
                 }
             });
             
-            const responseText = await response.text();
-            try {
-                const data = JSON.parse(responseText);
-                localStorage.setItem('wrapData', JSON.stringify(data));
-                navigate('/welcome');
-            } catch (parseError) {
-                console.error('Parse error:', parseError);
-                setError('Failed to parse server response');
-            }
+            const data = await response.json();
+            
+            // Format data to match SavedWraps format
+            const formattedData = {
+                message: 'Spotify wrap loaded successfully',
+                wrap_id: data.wrap_id,
+                data: {
+                    top_artist: {
+                        name: data.data.top_artist?.name || '',
+                        genres: data.data.top_artist?.genres || [],
+                        popularity: data.data.top_artist?.popularity || 0
+                    },
+                    top_track: {
+                        name: data.data.top_track?.name || '',
+                        artists: (data.data.top_track?.artists || []).map(artist => 
+                            typeof artist === 'object' ? artist.name : artist
+                        )
+                    },
+                    top_album: {
+                        name: data.data.top_album?.name || '',
+                        artists: (data.data.top_album?.artists || []).map(artist => 
+                            typeof artist === 'object' ? artist.name : artist
+                        )
+                    },
+                    top_genres: data.data.top_genres?.map(genre => 
+                        typeof genre === 'object' ? genre.name : genre
+                    ) || [],
+                    top_tracks: {
+                        items: (data.data.top_tracks?.items || []).map(track => ({
+                            name: track.name || '',
+                            artists: (track.artists || []).map(artist => 
+                                typeof artist === 'object' ? artist.name : artist
+                            )
+                        }))
+                    },
+                    top_artists: data.data.top_artists || { items: [] }
+                }
+            };
+    
+            localStorage.setItem('wrapData', JSON.stringify(formattedData));
+            navigate('/welcome');
         } catch (err) {
             console.error('Network error:', err);
             setError(err.message);
