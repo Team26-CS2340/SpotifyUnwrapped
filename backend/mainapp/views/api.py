@@ -648,3 +648,47 @@ def toggle_wrap_visibility(request, wrap_id):
         return Response({
             'error': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_public_wraps(request):
+    wraps = SpotifyWrapHistory.objects.filter(is_public=True).select_related('user_profile')
+    data = []
+    for wrap in wraps:
+        wrap_data = {
+            'id': wrap.id,
+            'year': wrap.year,
+            'created_at': wrap.created_at,
+            'user_profile': {
+                'spotify_display_name': wrap.user_profile.spotify_display_name
+            },
+            'top_artist': wrap.top_artist,
+            'top_track': wrap.top_track,
+            'genre_count': len(wrap.top_genres)
+        }
+        data.append(wrap_data)
+    return Response(data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_public_wrap_detail(request, wrap_id):
+    try:
+        wrap = SpotifyWrapHistory.objects.get(id=wrap_id, is_public=True)
+        response_data = {
+            'id': wrap.id,
+            'year': wrap.year,
+            'created_at': wrap.created_at,
+            'top_artists': wrap.top_artists,
+            'top_artist': wrap.top_artist,
+            'top_albums': wrap.top_albums,
+            'top_album': wrap.top_album,
+            'top_tracks': wrap.top_tracks,
+            'top_track': wrap.top_track,
+            'top_genres': wrap.top_genres,
+            'user_profile': {
+                'spotify_display_name': wrap.user_profile.spotify_display_name
+            }
+        }
+        return Response(response_data)
+    except SpotifyWrapHistory.DoesNotExist:
+        return Response({'error': 'Wrap not found'}, status=status.HTTP_404_NOT_FOUND)

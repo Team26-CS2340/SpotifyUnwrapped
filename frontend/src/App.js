@@ -15,6 +15,7 @@ import TopGenre from './components/wraps/topgenre';
 import Top5Artists from './components/wraps/top5artists';
 import Finish from './components/wraps/finish';
 import SavedWraps from './components/Savedwraps';
+import PublicWraps from './components/publicwraps';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -52,6 +53,7 @@ function App() {
           <Route path="/top5artists" element={<Top5Artists />} />
           <Route path="/finish" element={<Finish />} />
           <Route path="/savedwraps" element={<SavedWraps />} />
+          <Route path="/publicwraps" element={<PublicWraps />} />
         </Routes>
       </Router>
     </AuthProvider>
