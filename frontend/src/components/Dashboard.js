@@ -7,19 +7,20 @@ export default function Dashboard() {
     const [error, setError] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Define theme-aware colors using CSS variables
+    // Define theme-aware colors
     const themeColors = {
-        accent: 'var(--theme-accent)',
-        buttonGradient: 'var(--button-gradient)',
-        buttonBg: 'var(--button-bg, #17093a)',  // defaults to black if variable not set
-        buttonText: 'var(--button-text, #ffffff)'  // defaults to white if variable not set
+        accent: '#A29BFE', // Light purple accent
+        buttonBg: '#6C63FF', // Purple button
+        buttonText: '#FFFFFF', // White button text
+        background: '#1E2A47', // Purple container background
+        textPrimary: '#FFFFFF', // Primary text color
     };
 
     // Fetch user data from the backend
     const fetchUserData = async () => {
         try {
             const response = await fetch('http://localhost:8000/api/user/data/', {
-                credentials: 'include'
+                credentials: 'include',
             });
             if (!response.ok) {
                 throw new Error('Failed to fetch user data');
@@ -42,13 +43,12 @@ export default function Dashboard() {
         fetchUserData();
     }, []);
 
-    // Refresh data handler
     const handleRefreshData = async () => {
         try {
             setRefreshing(true);
             const response = await fetch('http://localhost:8000/api/user/refresh-spotify/', {
                 method: 'POST',
-                credentials: 'include'
+                credentials: 'include',
             });
             if (!response.ok) {
                 throw new Error('Failed to refresh data');
@@ -65,20 +65,24 @@ export default function Dashboard() {
     if (loading) {
         return (
             <Layout>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minHeight: 'calc(100vh - 120px)'
-                }}>
-                    <div style={{ 
-                        width: '50px', 
-                        height: '50px', 
-                        border: `3px solid ${themeColors.accent}`, 
-                        borderTopColor: 'transparent', 
-                        borderRadius: '50%', 
-                        animation: 'spin 1s linear infinite' 
-                    }} />
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: 'calc(100vh - 120px)',
+                    }}
+                >
+                    <div
+                        style={{
+                            width: '50px',
+                            height: '50px',
+                            border: `3px solid ${themeColors.accent}`,
+                            borderTopColor: 'transparent',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite',
+                        }}
+                    />
                 </div>
             </Layout>
         );
@@ -87,20 +91,25 @@ export default function Dashboard() {
     if (error) {
         return (
             <Layout>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minHeight: 'calc(100vh - 120px)'
-                }}>
-                    <div style={{ 
-                        backgroundColor: 'rgba(0,0,0,0.7)', 
-                        padding: '20px', 
-                        borderRadius: '10px',
-                        color: 'white',
-                        textAlign: 'center'
-                    }}>
-                        <p style={{ color: '#ff4444', marginBottom: '20px' }}>{error}</p>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: 'calc(100vh - 120px)',
+                    }}
+                >
+                    <div
+                        style={{
+                            backgroundColor: themeColors.background,
+                            padding: '20px',
+                            borderRadius: '12px',
+                            color: themeColors.textPrimary,
+                            textAlign: 'center',
+                            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.25)',
+                        }}
+                    >
+                        <p style={{ color: '#FF4444', marginBottom: '20px' }}>{error}</p>
                         <button
                             onClick={() => window.location.href = '/'}
                             style={{
@@ -111,10 +120,6 @@ export default function Dashboard() {
                                 borderRadius: '20px',
                                 cursor: 'pointer',
                                 transition: 'transform 0.2s, opacity 0.2s',
-                                ':hover': {
-                                    transform: 'translateY(-1px)',
-                                    opacity: 0.9
-                                }
                             }}
                         >
                             Reconnect to Spotify
@@ -126,21 +131,29 @@ export default function Dashboard() {
     }
 
     const content = (
-        <div style={{ 
-            width: '100%',
-            maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '20px',
-            boxSizing: 'border-box'
-        }}>
-            <section style={{ 
-                backgroundColor: 'var(--bg-secondary)',
+        <div
+            style={{
+                width: '100%',
+                maxWidth: '1200px',
+                margin: '0 auto',
                 padding: '20px',
-                borderRadius: '8px',
-                marginBottom: '20px',
-                color: 'var(--text-primary)'
-            }}>
-                <h2 style={{ color: themeColors.accent, marginTop: 0 }}>{userData?.spotify_profile?.display_name}'s Stats</h2>
+                boxSizing: 'border-box',
+            }}
+        >
+            {/* Stats Section */}
+            <section
+                style={{
+                    backgroundColor: themeColors.background,
+                    padding: '20px',
+                    borderRadius: '12px',
+                    marginBottom: '20px',
+                    color: themeColors.textPrimary,
+                    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.25)',
+                }}
+            >
+                <h2 style={{ color: themeColors.accent, marginTop: 0 }}>
+                    {userData?.spotify_profile?.display_name}'s Stats
+                </h2>
                 <button
                     onClick={handleRefreshData}
                     disabled={refreshing}
@@ -153,95 +166,85 @@ export default function Dashboard() {
                         cursor: refreshing ? 'not-allowed' : 'pointer',
                         opacity: refreshing ? 0.7 : 1,
                         transition: 'transform 0.2s, opacity 0.2s',
-                        ':hover': {
-                            transform: 'translateY(-1px)',
-                            opacity: 0.9
-                        }
+                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
                     }}
                 >
                     {refreshing ? 'Refreshing...' : 'Refresh Data'}
                 </button>
-                <div style={{ 
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: '20px',
-                    marginTop: '20px'
-                }}>
-                    <div>
-                        <h3 style={{ color: themeColors.accent, marginTop: 0 }}>Saved Tracks</h3>
-                        <p style={{ 
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                            margin: '10px 0'
-                        }}>
-                            {userData?.spotify_data?.saved_tracks_count}
-                        </p>
-                    </div>
-                    <div>
-                        <h3 style={{ color: themeColors.accent, marginTop: 0 }}>Saved Albums</h3>
-                        <p style={{ 
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                            margin: '10px 0'
-                        }}>
-                            {userData?.spotify_data?.saved_albums_count}
-                        </p>
-                    </div>
-                    <div>
-                        <h3 style={{ color: themeColors.accent, marginTop: 0 }}>Playlists</h3>
-                        <p style={{ 
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                            margin: '10px 0'
-                        }}>
-                            {userData?.spotify_data?.playlist_count}
-                        </p>
-                    </div>
-                    <div>
-                        <h3 style={{ color: themeColors.accent, marginTop: 0 }}>Following</h3>
-                        <p style={{ 
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                            margin: '10px 0'
-                        }}>
-                            {userData?.spotify_data?.favorite_artists_count}
-                        </p>
-                    </div>
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(4, 1fr)',
+                        gap: '20px',
+                        marginTop: '20px',
+                    }}
+                >
+                    {[
+                        { label: 'Saved Tracks', value: userData?.spotify_data?.saved_tracks_count },
+                        { label: 'Saved Albums', value: userData?.spotify_data?.saved_albums_count },
+                        { label: 'Playlists', value: userData?.spotify_data?.playlist_count },
+                        { label: 'Following', value: userData?.spotify_data?.favorite_artists_count },
+                    ].map((item, index) => (
+                        <div key={index} style={{ textAlign: 'center' }}>
+                            <h3 style={{ color: themeColors.accent, marginTop: 0 }}>{item.label}</h3>
+                            <p
+                                style={{
+                                    fontSize: '24px',
+                                    fontWeight: 'bold',
+                                    margin: '10px 0',
+                                }}
+                            >
+                                {item.value || 0}
+                            </p>
+                        </div>
+                    ))}
                 </div>
             </section>
 
-            <section style={{ 
-                backgroundColor: 'var(--bg-secondary)',
-                padding: '20px',
-                borderRadius: '8px',
-                marginBottom: '20px'
-            }}>
+            {/* Top Artists Section */}
+            <section
+                style={{
+                    backgroundColor: themeColors.background,
+                    padding: '20px',
+                    borderRadius: '12px',
+                    marginBottom: '20px',
+                    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.25)',
+                }}
+            >
                 <h2 style={{ color: themeColors.accent, marginTop: 0 }}>Top Artists</h2>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {userData?.spotify_data?.top_artists?.items?.slice(0, 5).map((artist, index) => (
-                        <li key={artist.id} style={{ 
-                            marginBottom: '15px',
-                            borderBottom: '1px solid var(--border-color)',
-                            paddingBottom: '15px',
-                            display: 'flex',
-                            alignItems: 'center'
-                        }}>
-                            <strong style={{ 
-                                color: themeColors.accent, 
-                                marginRight: '15px',
-                                fontSize: '20px'
-                            }}>#{index + 1}</strong>
+                        <li
+                            key={artist.id}
+                            style={{
+                                marginBottom: '15px',
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                                paddingBottom: '15px',
+                                display: 'flex',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <strong
+                                style={{
+                                    color: themeColors.accent,
+                                    marginRight: '15px',
+                                    fontSize: '20px',
+                                }}
+                            >
+                                #{index + 1}
+                            </strong>
                             <div>
-                                <div style={{ 
-                                    fontWeight: 'bold', 
-                                    fontSize: '16px',
-                                    color: 'var(--text-primary)'
-                                }}>{artist.name}</div>
+                                <div
+                                    style={{
+                                        fontWeight: 'bold',
+                                        fontSize: '16px',
+                                        color: themeColors.textPrimary,
+                                    }}
+                                >
+                                    {artist.name}
+                                </div>
                                 {artist.genres?.length > 0 && (
-                                    <div style={{ 
-                                        color: 'var(--text-secondary)',
-                                        fontSize: '14px'
-                                    }}>
+                                    <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>
                                         {artist.genres.slice(0, 2).join(', ')}
                                     </div>
                                 )}
@@ -251,35 +254,39 @@ export default function Dashboard() {
                 </ul>
             </section>
 
-            <section style={{ 
-                backgroundColor: 'var(--bg-secondary)',
-                padding: '20px',
-                borderRadius: '8px'
-            }}>
+            {/* Recently Played Section */}
+            <section
+                style={{
+                    backgroundColor: themeColors.background,
+                    padding: '20px',
+                    borderRadius: '12px',
+                    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.25)',
+                }}
+            >
                 <h2 style={{ color: themeColors.accent, marginTop: 0 }}>Recently Played</h2>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                     {userData?.spotify_data?.recently_played?.items?.slice(0, 5).map((item) => (
-                        <li key={`${item.track.id}-${item.played_at}`} style={{
-                            marginBottom: '15px',
-                            borderBottom: '1px solid var(--border-color)',
-                            paddingBottom: '15px'
-                        }}>
-                            <div style={{ 
-                                fontWeight: 'bold', 
-                                fontSize: '16px',
-                                color: 'var(--text-primary)'
-                            }}>{item.track.name}</div>
-                            <div style={{ 
-                                color: 'var(--text-secondary)',
-                                fontSize: '14px'
-                            }}>
-                                by {item.track.artists.map(a => a.name).join(', ')}
+                        <li
+                            key={`${item.track.id}-${item.played_at}`}
+                            style={{
+                                marginBottom: '15px',
+                                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                                paddingBottom: '15px',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    fontWeight: 'bold',
+                                    fontSize: '16px',
+                                    color: themeColors.textPrimary,
+                                }}
+                            >
+                                {item.track.name}
                             </div>
-                            <div style={{ 
-                                color: 'var(--text-tertiary)',
-                                fontSize: '12px',
-                                marginTop: '5px'
-                            }}>
+                            <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                by {item.track.artists.map((a) => a.name).join(', ')}
+                            </div>
+                            <div style={{ fontSize: '12px', marginTop: '5px', color: 'rgba(255, 255, 255, 0.5)' }}>
                                 {new Date(item.played_at).toLocaleString()}
                             </div>
                         </li>
