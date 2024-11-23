@@ -1,17 +1,35 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// Create theme context
+// Create theme context with expanded color palette
 export const ThemeContext = createContext();
 
 const Layout = ({ children }) => {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isHarrisonFordMode, setIsHarrisonFordMode] = useState(false);
 
-    // Theme colors
-    const themeColors = {
-        accent: isDarkMode ? '#E6E6FA' : '#006400' // Light purple in dark mode, dark green in light mode
-    };
+    // Expanded theme colors object with both dark and light mode values
+    const getThemeColors = (darkMode) => ({
+        // Container backgrounds
+        containerBg: darkMode ? '#1E2A47' : '#E6F3FF', // Changed light mode to light blue
+        
+        // Text colors
+        textPrimary: darkMode ? '#FFFFFF' : '#1B4332', // Changed light mode to dark green
+        textSecondary: darkMode ? '#A0AEC0' : '#2D6A4F', // Changed light mode to slightly lighter green
+        
+        // Accent colors
+        accent: darkMode ? '#A29BFE' : '#1B4332', // Changed light mode to dark green
+        accentSecondary: darkMode ? '#6C63FF' : '#2D6A4F',
+        
+        // UI element colors
+        buttonBg: darkMode ? '#6C63FF' : '#2D6A4F',
+        buttonText: '#FFFFFF',
+        headerBg: darkMode ? '#282828' : '#FFFFFF',
+        borderColor: darkMode ? '#404040' : '#D1E9FF',
+        
+        // Overlay backgrounds
+        overlayBg: darkMode ? 'rgba(0,0,0,0.9)' : 'rgba(230, 243, 255, 0.9)',
+    });
 
     // Initialize theme states from localStorage
     useEffect(() => {
@@ -23,65 +41,57 @@ const Layout = ({ children }) => {
         
         // Set CSS variables for theme
         const root = document.documentElement;
+        const colors = getThemeColors(darkModeEnabled);
+        
         if (darkModeEnabled) {
             document.body.classList.add('dark-mode');
-            root.style.setProperty('--bg-primary', '#121212');
-            root.style.setProperty('--bg-secondary', '#282828');
+            root.style.setProperty('--bg-primary', '#1E2A47');
+            root.style.setProperty('--bg-secondary', colors.headerBg);
             root.style.setProperty('--bg-tertiary', '#3e3e3e');
-            root.style.setProperty('--text-primary', '#ffffff');
-            root.style.setProperty('--text-secondary', '#b3b3b3');
-            root.style.setProperty('--text-tertiary', '#888888');
-            root.style.setProperty('--border-color', '#404040');
-            root.style.setProperty('--accent-color', '#E6E6FA'); // Light purple for dark mode
+            root.style.setProperty('--text-primary', colors.textPrimary);
+            root.style.setProperty('--text-secondary', colors.textSecondary);
+            root.style.setProperty('--border-color', colors.borderColor);
+            root.style.setProperty('--accent-color', colors.accent);
         } else {
             document.body.classList.remove('dark-mode');
-            root.style.setProperty('--bg-primary', '#ffffff');
-            root.style.setProperty('--bg-secondary', '#f5f5f5');
+            root.style.setProperty('--bg-primary', '#E6F3FF');
+            root.style.setProperty('--bg-secondary', colors.headerBg);
             root.style.setProperty('--bg-tertiary', '#e8e8e8');
-            root.style.setProperty('--text-primary', '#333333');
-            root.style.setProperty('--text-secondary', '#666666');
-            root.style.setProperty('--text-tertiary', '#999999');
-            root.style.setProperty('--border-color', '#dddddd');
-            root.style.setProperty('--accent-color', '#006400'); // Dark green for light mode
-        }
-        
-        if (harrisonFordEnabled) {
-            document.body.classList.add('harrison-ford-theme');
+            root.style.setProperty('--text-primary', colors.textPrimary);
+            root.style.setProperty('--text-secondary', colors.textSecondary);
+            root.style.setProperty('--border-color', colors.borderColor);
+            root.style.setProperty('--accent-color', colors.accent);
         }
     }, []);
 
-    // Handle dark mode toggle
+    // Handle dark mode toggle with updated colors
     const handleDarkModeToggle = (event) => {
         const enabled = event.target.checked;
         setIsDarkMode(enabled);
         
         const root = document.documentElement;
+        const colors = getThemeColors(enabled);
+        
         if (enabled) {
             document.body.classList.add('dark-mode');
             localStorage.setItem('dark-mode', 'enabled');
-            root.style.setProperty('--bg-primary', '#121212');
-            root.style.setProperty('--bg-secondary', '#282828');
-            root.style.setProperty('--bg-tertiary', '#3e3e3e');
-            root.style.setProperty('--text-primary', '#ffffff');
-            root.style.setProperty('--text-secondary', '#b3b3b3');
-            root.style.setProperty('--text-tertiary', '#888888');
-            root.style.setProperty('--border-color', '#404040');
-            root.style.setProperty('--accent-color', '#E6E6FA'); // Light purple for dark mode
         } else {
             document.body.classList.remove('dark-mode');
             localStorage.setItem('dark-mode', 'disabled');
-            root.style.setProperty('--bg-primary', '#ffffff');
-            root.style.setProperty('--bg-secondary', '#f5f5f5');
-            root.style.setProperty('--bg-tertiary', '#e8e8e8');
-            root.style.setProperty('--text-primary', '#333333');
-            root.style.setProperty('--text-secondary', '#666666');
-            root.style.setProperty('--text-tertiary', '#999999');
-            root.style.setProperty('--border-color', '#dddddd');
-            root.style.setProperty('--accent-color', '#006400'); // Dark green for light mode
         }
+        
+        // Update CSS variables with new theme colors
+        root.style.setProperty('--bg-primary', colors.containerBg);
+        root.style.setProperty('--bg-secondary', colors.headerBg);
+        root.style.setProperty('--text-primary', colors.textPrimary);
+        root.style.setProperty('--text-secondary', colors.textSecondary);
+        root.style.setProperty('--border-color', colors.borderColor);
+        root.style.setProperty('--accent-color', colors.accent);
+        root.style.setProperty('--accent-color-secondary', colors.accentSecondary);
+        
     };
 
-    // Handle Harrison Ford theme toggle
+    // Rest of the component remains the same
     const handleHarrisonFordToggle = (event) => {
         const enabled = event.target.checked;
         setIsHarrisonFordMode(enabled);
@@ -95,7 +105,6 @@ const Layout = ({ children }) => {
         }
     };
 
-    // Get the appropriate background image based on theme states
     const getBackgroundImage = () => {
         if (isHarrisonFordMode) {
             return 'url("/backgroundStarry.jpeg")';
@@ -105,19 +114,22 @@ const Layout = ({ children }) => {
         return 'url("/background.jpeg")';
     };
 
+
+    const colors = getThemeColors(isDarkMode);
+
     const headerStyle = {
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
-        backgroundColor: isDarkMode ? '#282828' : 'white',
+        backgroundColor: colors.headerBg,
         padding: '15px 0',
         zIndex: 1000,
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     };
 
     const navLinkStyle = {
-        color: isDarkMode ? 'white' : '#333',
+        color: colors.textPrimary,
         textDecoration: 'none',
         marginRight: '20px',
         fontWeight: '500',
@@ -125,7 +137,7 @@ const Layout = ({ children }) => {
     };
 
     return (
-        <ThemeContext.Provider value={{ isDarkMode, themeColors }}>
+        <ThemeContext.Provider value={{ isDarkMode, colors }}>
             <div style={{
                 minHeight: '100vh',
                 backgroundImage: getBackgroundImage(),
@@ -149,7 +161,7 @@ const Layout = ({ children }) => {
                                 ...navLinkStyle, 
                                 fontSize: '24px', 
                                 fontWeight: 'bold', 
-                                color: themeColors.accent,
+                                color: colors.accent,
                                 transition: 'color 0.3s ease'
                             }}>
                                 Spotify Wrapped
@@ -159,7 +171,7 @@ const Layout = ({ children }) => {
                                 <Link to="/wrap" style={navLinkStyle}>Your Wrap</Link>
                             </nav>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', color: isDarkMode ? 'white' : '#333' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', color: colors.textPrimary }}>
                             <label>
                                 <input 
                                     type="checkbox"
@@ -185,7 +197,7 @@ const Layout = ({ children }) => {
                 {/* Main Content */}
                 <main style={{ 
                     paddingTop: '120px',
-                    backgroundColor: isDarkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.7)',
+                    backgroundColor: colors.overlayBg,
                     minHeight: '100vh',
                     position: 'relative',
                     overflow: 'hidden'

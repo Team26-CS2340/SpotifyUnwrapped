@@ -143,11 +143,11 @@ export default function Dashboard() {
             {/* Stats Section */}
             <section
                 style={{
-                    backgroundColor: themeColors.background,
+                    backgroundColor: themeColors.containerBg,
                     padding: '20px',
                     borderRadius: '12px',
                     marginBottom: '20px',
-                    color: themeColors.textPrimary,
+                    color: themeColors.textSecondary,
                     boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.25)',
                 }}
             >
@@ -186,7 +186,7 @@ export default function Dashboard() {
                         { label: 'Following', value: userData?.spotify_data?.favorite_artists_count },
                     ].map((item, index) => (
                         <div key={index} style={{ textAlign: 'center' }}>
-                            <h3 style={{ color: themeColors.accent, marginTop: 0 }}>{item.label}</h3>
+                            <h3 style={{ color: themeColors.accentSecondary, marginTop: 0 }}>{item.label}</h3>
                             <p
                                 style={{
                                     fontSize: '24px',
@@ -204,7 +204,7 @@ export default function Dashboard() {
             {/* Top Artists Section */}
             <section
                 style={{
-                    backgroundColor: themeColors.background,
+                    backgroundColor: themeColors.containerBg,
                     padding: '20px',
                     borderRadius: '12px',
                     marginBottom: '20px',
@@ -226,7 +226,7 @@ export default function Dashboard() {
                         >
                             <strong
                                 style={{
-                                    color: themeColors.accent,
+                                    color: themeColors.accentSecondary,
                                     marginRight: '15px',
                                     fontSize: '20px',
                                 }}
@@ -238,7 +238,7 @@ export default function Dashboard() {
                                     style={{
                                         fontWeight: 'bold',
                                         fontSize: '16px',
-                                        color: themeColors.textPrimary,
+                                        color: themeColors.textSecondary,
                                     }}
                                 >
                                     {artist.name}
@@ -257,7 +257,7 @@ export default function Dashboard() {
             {/* Recently Played Section */}
             <section
                 style={{
-                    backgroundColor: themeColors.background,
+                    backgroundColor: themeColors.containerBg,
                     padding: '20px',
                     borderRadius: '12px',
                     boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.25)',
@@ -272,13 +272,14 @@ export default function Dashboard() {
                                 marginBottom: '15px',
                                 borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
                                 paddingBottom: '15px',
+                                
                             }}
                         >
                             <div
                                 style={{
                                     fontWeight: 'bold',
                                     fontSize: '16px',
-                                    color: themeColors.textPrimary,
+                                    color: themeColors.textSecondary,
                                 }}
                             >
                                 {item.track.name}
