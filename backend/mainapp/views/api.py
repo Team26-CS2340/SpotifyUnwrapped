@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import redirect
-from ..models import UserProfile, SpotifyWrapHistory
+from ..models import UserProfile, SpotifyWrapHistory, WrapLike
 from django.contrib.auth import login
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -14,6 +14,7 @@ import logging
 import json
 from ..utils.spotify import SpotifyAPI
 import google.generativeai as genai
+from django.shortcuts import get_object_or_404
 import os
 from django.views.decorators.csrf import ensure_csrf_cookie
 from dotenv import load_dotenv
@@ -650,24 +651,46 @@ def toggle_wrap_visibility(request, wrap_id):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_public_wraps(request):
-    wraps = SpotifyWrapHistory.objects.filter(is_public=True).select_related('user_profile')
-    data = []
-    for wrap in wraps:
-        wrap_data = {
-            'id': wrap.id,
-            'year': wrap.year,
-            'created_at': wrap.created_at,
-            'user_profile': {
-                'spotify_display_name': wrap.user_profile.spotify_display_name
-            },
-            'top_artist': wrap.top_artist,
-            'top_track': wrap.top_track,
-            'genre_count': len(wrap.top_genres)
-        }
-        data.append(wrap_data)
-    return Response(data)
+    filter_type = request.query_params.get('filter', 'all')
+    user_profile = request.user.userprofile
+    
+    queryset = SpotifyWrapHistory.objects.filter(is_public=True)
+    
+    if filter_type == 'liked':
+        liked_wraps = WrapLike.objects.filter(user_profile=user_profile).values_list('wrap_id', flat=True)
+        queryset = queryset.filter(id__in=liked_wraps)
+    elif filter_type == 'following':
+        following = user_profile.following.all()
+        queryset = queryset.filter(user_profile__in=following)
+    
+    wraps = queryset.select_related('user_profile')
+    
+    # Get the user's likes
+    user_likes = WrapLike.objects.filter(
+        user_profile=user_profile,
+        wrap__in=queryset
+    ).values_list('wrap_id', flat=True)
+    
+    # Get the user's following
+    user_following = user_profile.following.values_list('id', flat=True)
+    
+    return Response([{
+        'id': wrap.id,
+        'year': wrap.year,
+        'created_at': wrap.created_at,
+        'user_profile': {
+            'id': wrap.user_profile.id,
+            'spotify_display_name': wrap.user_profile.spotify_display_name
+        },
+        'likes_count': WrapLike.objects.filter(wrap=wrap).count(),
+        'is_liked': wrap.id in user_likes,
+        'is_following': wrap.user_profile.id in user_following,
+        'top_artist': wrap.top_artist,
+        'top_track': wrap.top_track,
+        'genre_count': len(wrap.top_genres) if wrap.top_genres else 0,
+    } for wrap in wraps])
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -692,3 +715,101 @@ def get_public_wrap_detail(request, wrap_id):
         return Response(response_data)
     except SpotifyWrapHistory.DoesNotExist:
         return Response({'error': 'Wrap not found'}, status=status.HTTP_404_NOT_FOUND)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_public_wraps(request):
+    filter_type = request.query_params.get('filter', 'all')
+    user_profile = request.user.userprofile
+    
+    queryset = SpotifyWrapHistory.objects.filter(is_public=True)
+    
+    if filter_type == 'liked':
+        liked_wraps = WrapLike.objects.filter(user_profile=user_profile).values_list('wrap_id', flat=True)
+        queryset = queryset.filter(id__in=liked_wraps)
+    elif filter_type == 'following':
+        following = user_profile.following.all()
+        queryset = queryset.filter(user_profile__in=following)
+    
+    wraps = queryset.select_related('user_profile')
+    
+    # Get the likes for the current user
+    user_likes = WrapLike.objects.filter(
+        user_profile=user_profile,
+        wrap__in=queryset
+    ).values_list('wrap_id', flat=True)
+    
+    return Response([{
+        'id': wrap.id,
+        'year': wrap.year,
+        'created_at': wrap.created_at,
+        'user_profile': {
+            'id': wrap.user_profile.id,
+            'spotify_display_name': wrap.user_profile.spotify_display_name
+        },
+        'likes_count': WrapLike.objects.filter(wrap=wrap).count(),
+        'is_liked': wrap.id in user_likes,
+        'is_following': user_profile.following.filter(id=wrap.user_profile.id).exists(),
+        'top_artist': wrap.top_artist,
+        'top_track': wrap.top_track,
+        'genre_count': len(wrap.top_genres) if wrap.top_genres else 0,
+    } for wrap in wraps])
+
+@ensure_csrf_cookie
+@api_view(['POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def toggle_like(request, wrap_id):
+    user_profile = request.user.userprofile
+    wrap = get_object_or_404(SpotifyWrapHistory, id=wrap_id)
+    
+    if request.method == 'POST':
+        like, created = WrapLike.objects.get_or_create(
+            user_profile=user_profile,
+            wrap=wrap
+        )
+        return Response({'status': 'liked', 'created': created})
+    
+    elif request.method == 'DELETE':
+        WrapLike.objects.filter(
+            user_profile=user_profile,
+            wrap=wrap
+        ).delete()
+        return Response({'status': 'unliked'})
+
+@ensure_csrf_cookie
+@api_view(['POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def toggle_follow(request, profile_id):
+    try:
+        user_profile = request.user.userprofile
+        profile_to_follow = UserProfile.objects.get(id=profile_id)
+        
+        if user_profile.id == profile_id:
+            return Response(
+                {'error': 'Cannot follow yourself'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if request.method == 'POST':
+            user_profile.follow(profile_to_follow)
+            return Response({
+                'status': 'following',
+                'profile_id': profile_id
+            })
+            
+        elif request.method == 'DELETE':
+            user_profile.unfollow(profile_to_follow)
+            return Response({
+                'status': 'unfollowed',
+                'profile_id': profile_id
+            })
+            
+    except UserProfile.DoesNotExist:
+        return Response(
+            {'error': 'Profile not found'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )

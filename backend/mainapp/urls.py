@@ -10,7 +10,9 @@ from .views.api import (  # Explicitly import all api views
     get_wrap_detail,
     toggle_wrap_visibility,
     get_public_wrap_detail,
-    get_public_wraps
+    get_public_wraps,
+    toggle_follow,
+    toggle_like
 )
 from .views.auth import register, sign_in, sign_out
 from .views import api, testapi
@@ -35,6 +37,9 @@ api_urlpatterns = [
     path('api/user/wrap/<int:wrap_id>/toggle-visibility/', toggle_wrap_visibility, name='toggle-wrap-visibility'),
     path('api/wraps/public/', get_public_wraps, name='public-wraps'),
     path('api/wrap/<int:wrap_id>/public/', get_public_wrap_detail, name='public-wrap-detail'),
+path('api/wraps/public/', get_public_wraps, name='get_public_wraps'),
+    path('api/wraps/<int:wrap_id>/like/', toggle_like, name='toggle_like'),
+    path('api/profile/<int:profile_id>/follow/', toggle_follow, name='toggle_follow'),
 
 ]
 
