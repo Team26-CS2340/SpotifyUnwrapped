@@ -157,6 +157,15 @@ export default function PublicWraps() {
         );
     }
 
+    const extractArtistNames = (artists) => {
+        if (!artists) return [];
+        return artists.map(artist => {
+            if (typeof artist === 'object' && artist.name) return artist.name;
+            if (typeof artist === 'string') return artist;
+            return '';
+        }).filter(name => name);
+    };
+
     return (
         <Layout>
             <div style={{
@@ -245,7 +254,7 @@ export default function PublicWraps() {
                                     <div style={{ fontWeight: 'bold' }}>Top Track</div>
                                     <div>{wrap.top_track.name}</div>
                                     <div style={{ fontSize: '0.9em', color: '#b3b3b3' }}>
-                                        by {wrap.top_track.artists.join(', ')}
+                                        by {extractArtistNames(wrap.top_track.artists).join(', ')}
                                     </div>
                                 </div>
                                 

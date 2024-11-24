@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from './Layout';
 
 export default function SavedWraps() {
@@ -7,9 +7,20 @@ export default function SavedWraps() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
 
+    // Fetch wraps on mount and when pathname changes
     useEffect(() => {
         fetchWraps();
+    }, [location.pathname]);
+
+    // Add focus event listener for page returns
+    useEffect(() => {
+        const handleFocus = () => {
+            fetchWraps();
+        };
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
     }, []);
 
     const fetchWraps = async () => {
@@ -28,7 +39,14 @@ export default function SavedWraps() {
             }
             
             const data = await response.json();
-            setWraps(data);
+            console.log('Fetched wraps data:', data);
+            
+            const wrapsData = data.map(wrap => ({
+                ...wrap,
+                is_public: wrap.is_public === true || wrap.is_public === 'true' || wrap.is_public === 'True'
+            }));
+            
+            setWraps(wrapsData);
             setError(null);
         } catch (err) {
             console.error('Error fetching wraps:', err);
@@ -37,6 +55,45 @@ export default function SavedWraps() {
             setLoading(false);
         }
     };
+
+    const handleToggleVisibility = async (wrapId, currentVisibility, e) => {
+        e.stopPropagation();
+        try {
+            const csrfToken = getCookie('csrftoken');
+            
+            // Immediately update the UI
+            setWraps(prevWraps => prevWraps.map(wrap =>
+                wrap.id === wrapId
+                    ? { ...wrap, is_public: !currentVisibility }
+                    : wrap
+            ));
+
+            const response = await fetch(`http://localhost:8000/api/user/wrap/${wrapId}/toggle-visibility/`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ is_public: !currentVisibility })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to update visibility: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log('Toggle visibility response:', result);
+
+        } catch (err) {
+            console.error('Error updating visibility:', err);
+            setError(err.message || 'Failed to update visibility');
+            // Revert the optimistic update if there was an error
+            await fetchWraps();
+        }
+    };
+
 
     const handleWrapClick = async (wrapId) => {
         try {
@@ -108,9 +165,7 @@ export default function SavedWraps() {
         e.stopPropagation();
         if (window.confirm('Are you sure you want to delete this wrap?')) {
             try {
-                const csrfToken = document.cookie.split('; ')
-                    .find(row => row.startsWith('csrftoken='))
-                    ?.split('=')[1];
+                const csrfToken = getCookie('csrftoken');
     
                 const response = await fetch(`http://localhost:8000/api/user/wrap/${wrapId}/`, {
                     method: 'DELETE',
@@ -126,7 +181,7 @@ export default function SavedWraps() {
                     throw new Error(`Failed to delete wrap: ${response.status}`);
                 }
                 
-                setWraps(wraps.filter(wrap => wrap.id !== wrapId));
+                setWraps(prevWraps => prevWraps.filter(wrap => wrap.id !== wrapId));
             } catch (err) {
                 console.error('Error deleting wrap:', err);
                 setError(err.message || 'Failed to delete wrap');
@@ -148,36 +203,6 @@ export default function SavedWraps() {
         }
         return cookieValue;
     }
-    
-    const handleToggleVisibility = async (wrapId, currentVisibility, e) => {
-        e.stopPropagation();
-        try {
-            const csrfToken = getCookie('csrftoken');
-            const response = await fetch(`http://localhost:8000/api/user/wrap/${wrapId}/toggle-visibility/`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({ is_public: !currentVisibility })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Failed to update visibility: ${response.status}`);
-            }
-            
-            setWraps(wraps.map(wrap => 
-                wrap.id === wrapId 
-                    ? { ...wrap, is_public: !wrap.is_public }
-                    : wrap
-            ));
-        } catch (err) {
-            console.error('Error updating visibility:', err);
-            setError(err.message || 'Failed to update visibility');
-        }
-    };
 
     if (loading) {
         return (
@@ -326,6 +351,16 @@ export default function SavedWraps() {
                                     <div>{wrap.genre_count} unique genres</div>
                                 </div>
 
+                                <div style={{ marginBottom: '15px' }}>
+        <div style={{ fontWeight: 'bold' }}>Visibility Status</div>
+        <div style={{ 
+            color: wrap.is_public ? '#1DB954' : '#b3b3b3',
+            fontStyle: 'italic'
+        }}>
+            {typeof wrap.is_public === 'boolean' ? (wrap.is_public ? 'Public' : 'Private') : 'Loading...'}
+        </div>
+    </div>
+
                                 <div style={{
                                     display: 'flex',
                                     justifyContent: 'space-between',
@@ -345,7 +380,7 @@ export default function SavedWraps() {
                                             fontSize: '0.8em'
                                         }}
                                     >
-                                        {wrap.is_public ? 'Public' : 'Private'}
+                                        Toggle visibility
                                     </button>
                                     <button
                                         onClick={(e) => handleDeleteWrap(wrap.id, e)}

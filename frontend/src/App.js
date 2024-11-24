@@ -12,7 +12,7 @@ import Top5Songs from './components/wraps/top5songs';
 import TopArtist from './components/wraps/topartist';
 import Top5Genres from './components/wraps/top5genres';
 import TopGenre from './components/wraps/topgenre';
-import Top5Artists from './components/wraps/top5artists';
+import TopAlbum from './components/wraps/topalbum';
 import Finish from './components/wraps/finish';
 import SavedWraps from './components/Savedwraps';
 import PublicWraps from './components/publicwraps';
@@ -50,7 +50,7 @@ function App() {
           <Route path="/topartist" element={<TopArtist />} /> 
           <Route path="/top5genres" element={<Top5Genres />} /> 
           <Route path="/topgenre" element={<TopGenre />} />
-          <Route path="/top5artists" element={<Top5Artists />} />
+          <Route path="/topAlbum" element={<TopAlbum />} />
           <Route path="/finish" element={<Finish />} />
           <Route path="/savedwraps" element={<SavedWraps />} />
           <Route path="/publicwraps" element={<PublicWraps />} />

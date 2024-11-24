@@ -55,3 +55,13 @@ class SpotifyWrapHistory(models.Model):
 
     def __str__(self):
         return f"{self.user_profile.spotify_display_name}'s Wrap - {self.year}"
+class WrapLike(models.Model):
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    wrap = models.ForeignKey(SpotifyWrapHistory, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user_profile', 'wrap')  # Prevent duplicate likes
+        
+    def __str__(self):
+        return f"{self.user_profile.spotify_display_name} likes {self.wrap}"

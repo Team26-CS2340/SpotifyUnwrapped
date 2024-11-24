@@ -134,7 +134,7 @@ const TopArtist = () => {
                     </div>
 
                     <button
-                        onClick={() => navigate('/top5artists')}
+                        onClick={() => navigate('/topalbum')}
                         style={{
                             backgroundColor: '#1DB954',
                             color: 'white',

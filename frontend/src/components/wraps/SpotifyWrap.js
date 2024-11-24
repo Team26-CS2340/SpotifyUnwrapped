@@ -39,6 +39,7 @@ function SpotifyWrap() {
             });
             
             const data = await response.json();
+            console.log('Original data from API:', JSON.stringify(data, null, 2));
             
             // Format data to match SavedWraps format
             const formattedData = {
@@ -73,9 +74,17 @@ function SpotifyWrap() {
                             )
                         }))
                     },
-                    top_artists: data.data.top_artists || { items: [] }
+                    top_artists: {
+                        items: (data.data.top_artists?.items || []).map(artist => ({
+                            name: artist.name || '',
+                            genres: artist.genres || [],
+                            popularity: artist.popularity || 0
+                        }))
+                    }
                 }
             };
+            
+            console.log('Formatted data:', JSON.stringify(formattedData, null, 2));
     
             localStorage.setItem('wrapData', JSON.stringify(formattedData));
             navigate('/welcome');
