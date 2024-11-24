@@ -1,6 +1,9 @@
-// src/components/Layout.js
 import React, { createContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+
+// Import images from the src/images folder
+import starsImage from '../images/stars.jpg';
+import harrisonFordImage from '../images/harrison_ford.jpg';
 
 // Create theme context
 export const ThemeContext = createContext();
@@ -16,8 +19,8 @@ const Layout = ({ children }) => {
         
         setIsDarkMode(darkModeEnabled);
         setIsHarrisonFordMode(harrisonFordEnabled);
-        
-        // Set CSS variables for theme
+
+        // Set CSS classes for themes
         const root = document.documentElement;
         if (darkModeEnabled) {
             document.body.classList.add('dark-mode');
@@ -38,9 +41,11 @@ const Layout = ({ children }) => {
             root.style.setProperty('--text-tertiary', '#999999');
             root.style.setProperty('--border-color', '#dddddd');
         }
-        
+
         if (harrisonFordEnabled) {
             document.body.classList.add('harrison-ford-theme');
+        } else {
+            document.body.classList.remove('harrison-ford-theme');
         }
     }, []);
 
@@ -77,7 +82,7 @@ const Layout = ({ children }) => {
     const handleHarrisonFordToggle = (event) => {
         const enabled = event.target.checked;
         setIsHarrisonFordMode(enabled);
-        
+
         if (enabled) {
             document.body.classList.add('harrison-ford-theme');
             localStorage.setItem('harrison-ford-theme', 'enabled');
@@ -95,7 +100,7 @@ const Layout = ({ children }) => {
         backgroundColor: isDarkMode ? '#282828' : 'white',
         padding: '15px 0',
         zIndex: 1000,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     };
 
     const navLinkStyle = {
@@ -103,91 +108,148 @@ const Layout = ({ children }) => {
         textDecoration: 'none',
         marginRight: '20px',
         fontWeight: '500',
-        transition: 'color 0.3s ease'
+        transition: 'color 0.3s ease',
     };
 
     return (
         <ThemeContext.Provider value={{ isDarkMode }}>
-            <div style={{
-                minHeight: '100vh',
-                backgroundImage: 'url("/background.jpeg")',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundAttachment: 'fixed'
-            }}>
+            <div
+                style={{
+                    minHeight: '100vh',
+                    backgroundImage: isHarrisonFordMode ? `url(${starsImage})` : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed',
+                }}
+            >
                 {/* Header */}
                 <header style={headerStyle}>
-                    <div style={{ 
-                        maxWidth: '1200px', 
-                        margin: '0 auto', 
-                        padding: '0 20px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                    }}>
+                    <div
+                        style={{
+                            maxWidth: '1200px',
+                            margin: '0 auto',
+                            padding: '0 20px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                        }}
+                    >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Link to="/Dashboard" style={{ ...navLinkStyle, fontSize: '24px', fontWeight: 'bold', color: '#1DB954' }}>
+                            <Link
+                                to="/Dashboard"
+                                style={{
+                                    ...navLinkStyle,
+                                    fontSize: '24px',
+                                    fontWeight: 'bold',
+                                    color: '#1DB954',
+                                }}
+                            >
                                 Spotify Wrapped
                             </Link>
                             <nav style={{ marginLeft: '40px' }}>
-                                <Link to="/personality" style={navLinkStyle}>Personality</Link>
-                                <Link to="/wrap" style={navLinkStyle}>Your Wrap</Link>
+                                <Link to="/personality" style={navLinkStyle}>
+                                    Personality
+                                </Link>
+                                <Link to="/wrap" style={navLinkStyle}>
+                                    Your Wrap
+                                </Link>
                             </nav>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', color: isDarkMode ? 'white' : '#333' }}>
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '20px',
+                                color: isDarkMode ? 'white' : '#333',
+                            }}
+                        >
                             <label>
-                                <input 
+                                <input
                                     type="checkbox"
                                     checked={isDarkMode}
                                     onChange={handleDarkModeToggle}
                                 />
-                                <span></span>
-                                Dark Mode
+                                <span></span> Dark Mode
                             </label>
                             <label>
-                                <input 
+                                <input
                                     type="checkbox"
                                     checked={isHarrisonFordMode}
                                     onChange={handleHarrisonFordToggle}
                                 />
-                                <span></span>
-                                Harrison Ford Theme
+                                <span></span> Harrison Ford Theme
                             </label>
                         </div>
                     </div>
                 </header>
 
                 {/* Main Content */}
-                <main style={{ 
-                    paddingTop: '120px', // Increased padding to prevent content overlap
-                    backgroundColor: isDarkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.7)',
-                    minHeight: '100vh',
-                    position: 'relative',
-                    overflow: 'hidden' // Prevents horizontal scrollbar
-                }}>
+                <main
+                    style={{
+                        paddingTop: '120px', // Adjusted for fixed header
+                        backgroundColor: isDarkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.7)',
+                        minHeight: '100vh',
+                        position: 'relative',
+                        overflow: 'hidden',
+                    }}
+                >
                     {children}
                 </main>
 
                 {/* Footer */}
-                <footer style={{
-                    backgroundColor: 'rgba(0,0,0,0.9)',
-                    color: 'white',
-                    padding: '20px',
-                    textAlign: 'center'
-                }}>
+                <footer
+                    style={{
+                        backgroundColor: isHarrisonFordMode ? '#deb887' : '#282828',
+                        color: isHarrisonFordMode ? '#8b4513' : 'white',
+                        padding: '20px',
+                        textAlign: 'center',
+                    }}
+                >
                     <section id="share">
                         <h2>Share Your Wrapped!</h2>
-                        <a id="twitter-share" href="#" target="_blank" rel="noopener noreferrer">Share on Twitter</a>
-                        <a id="linkedin-share" href="#" target="_blank" rel="noopener noreferrer">Share on LinkedIn</a>
-                        <a id="facebook-share" href="#" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
-                        <a id="instagram-share" href="#" target="_blank" rel="noopener noreferrer">Share on Instagram</a>
+                        <a
+                            id="twitter-share"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Share on Twitter
+                        </a>
+                        <a
+                            id="linkedin-share"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Share on LinkedIn
+                        </a>
+                        <a
+                            id="facebook-share"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Share on Facebook
+                        </a>
+                        <a
+                            id="instagram-share"
+                            href="#"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Share on Instagram
+                        </a>
                     </section>
                     <p>&copy; 2024 Spotify Wrapped</p>
                 </footer>
 
+                {/* Harrison Ford Image */}
                 {isHarrisonFordMode && (
                     <div id="harrisonFordImage">
-                        <img src="/images/harrison_ford.jpg" alt="Harrison Ford" />
+                        <img
+                            src={harrisonFordImage}
+                            alt="Harrison Ford"
+                        />
                     </div>
                 )}
             </div>
