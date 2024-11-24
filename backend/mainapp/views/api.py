@@ -17,6 +17,8 @@ import google.generativeai as genai
 from django.shortcuts import get_object_or_404
 import os
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.core.mail import send_mail
+from django.conf import settings
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -812,4 +814,46 @@ def toggle_follow(request, profile_id):
         return Response(
             {'error': str(e)}, 
             status=status.HTTP_400_BAD_REQUEST
+        )
+    
+@api_view(['POST'])
+def contact_form(request):
+    try:
+        name = request.data.get('name')
+        email = request.data.get('email')
+        message = request.data.get('message')
+        
+        if not all([name, email, message]):
+            return Response(
+                {'error': 'Please provide all required fields'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # Format the email
+        subject = f'New Contact Form Submission from {name}'
+        email_message = f"""
+        New contact form submission:
+        
+        Name: {name}
+        Email: {email}
+        
+        Message:
+        {message}
+        """
+        
+        # Send email
+        send_mail(
+            subject=subject,
+            message=email_message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[settings.EMAIL_HOST_USER],  # Send to yourself
+            fail_silently=False,
+        )
+        
+        return Response({'message': 'Email sent successfully'})
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

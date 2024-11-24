@@ -16,6 +16,7 @@ import TopAlbum from './components/wraps/topalbum';
 import Finish from './components/wraps/finish';
 import SavedWraps from './components/Savedwraps';
 import PublicWraps from './components/publicwraps';
+import ContactForm from './components/contact';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -54,6 +55,7 @@ function App() {
           <Route path="/finish" element={<Finish />} />
           <Route path="/savedwraps" element={<SavedWraps />} />
           <Route path="/publicwraps" element={<PublicWraps />} />
+          <Route path="/contact" element={<ContactForm />} />
         </Routes>
       </Router>
     </AuthProvider>
