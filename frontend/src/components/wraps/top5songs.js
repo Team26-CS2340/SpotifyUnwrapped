@@ -22,7 +22,8 @@ const Top5Songs = () => {
                 minHeight: 'calc(100vh - 90px)',
                 padding: '10px',
                 marginTop: '20px',
-                backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                backgroundImage: 'url(/Top5Songs.png)',
             }}>
                 <div style={{
                     maxWidth: '1200px',

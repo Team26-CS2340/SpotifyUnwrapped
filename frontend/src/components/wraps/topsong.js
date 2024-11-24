@@ -1,4 +1,3 @@
-// src/wraps/TopSong.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
@@ -12,6 +11,15 @@ const TopSong = () => {
         return null;
     }
 
+    const themeColors = {
+        buttonBg: 'var(--accent-color)',
+        buttonTextColor: '#FFFFFF',
+        buttonHoverBg: '#5b54d9',
+        background: 'var(--bg-primary)',
+        textPrimary: 'var(--text-primary)',
+        accent: 'var(--accent-color)'
+    };
+
     return (
         <Layout>
             <div style={{
@@ -21,7 +29,9 @@ const TopSong = () => {
                 minHeight: 'calc(100vh - 90px)',
                 padding: '10px',
                 marginTop: '20px',
-                backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                backgroundColor: themeColors.background,
+                backgroundImage: 'url(/TopSong.png)',
+
             }}>
                 <div style={{
                     maxWidth: '1200px',
@@ -38,17 +48,17 @@ const TopSong = () => {
                         borderRadius: '20px',
                         width: '80%',
                         maxWidth: '600px',
-                        marginBottom: '40px' // Add space before button
+                        marginBottom: '40px'
                     }}>
                         <h1 style={{
-                            color: '#1DB954',
+                            color: themeColors.accent,
                             marginBottom: '20px',
                             fontSize: '2.5em'
                         }}>
                             Your Top Track
                         </h1>
                         <h2 style={{
-                            color: 'white',
+                            color: themeColors.textPrimary,
                             marginBottom: '15px',
                             fontSize: '2em'
                         }}>
@@ -65,8 +75,8 @@ const TopSong = () => {
                     <button
                         onClick={() => navigate('/top5songs')}
                         style={{
-                            backgroundColor: '#1DB954',
-                            color: 'white',
+                            backgroundColor: themeColors.buttonBg,
+                            color: themeColors.buttonTextColor,
                             border: 'none',
                             padding: '15px 40px',
                             borderRadius: '25px',
@@ -74,15 +84,17 @@ const TopSong = () => {
                             fontWeight: 'bold',
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                            boxShadow: '0 4px 6px rgba(0,0,0,0.2)'
                         }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.05)';
-                            e.currentTarget.style.backgroundColor = '#1ed760';
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                            e.currentTarget.style.boxShadow = '0px 6px 12px rgba(0, 0, 0, 0.2)';
+                            e.currentTarget.style.backgroundColor = themeColors.buttonHoverBg;
                         }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                            e.currentTarget.style.backgroundColor = '#1DB954';
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.2)';
+                            e.currentTarget.style.backgroundColor = themeColors.buttonBg;
                         }}
                     >
                         Next →

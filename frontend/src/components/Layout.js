@@ -64,7 +64,6 @@ const Layout = ({ children }) => {
         }
     }, []);
 
-    // Handle dark mode toggle with updated colors
     const handleDarkModeToggle = (event) => {
         const enabled = event.target.checked;
         setIsDarkMode(enabled);
@@ -80,7 +79,6 @@ const Layout = ({ children }) => {
             localStorage.setItem('dark-mode', 'disabled');
         }
         
-        // Update CSS variables with new theme colors
         root.style.setProperty('--bg-primary', colors.containerBg);
         root.style.setProperty('--bg-secondary', colors.headerBg);
         root.style.setProperty('--text-primary', colors.textPrimary);
@@ -88,10 +86,8 @@ const Layout = ({ children }) => {
         root.style.setProperty('--border-color', colors.borderColor);
         root.style.setProperty('--accent-color', colors.accent);
         root.style.setProperty('--accent-color-secondary', colors.accentSecondary);
-        
     };
 
-    // Rest of the component remains the same
     const handleHarrisonFordToggle = (event) => {
         const enabled = event.target.checked;
         setIsHarrisonFordMode(enabled);
@@ -114,7 +110,6 @@ const Layout = ({ children }) => {
         return 'url("/background.jpeg")';
     };
 
-
     const colors = getThemeColors(isDarkMode);
 
     const headerStyle = {
@@ -134,6 +129,35 @@ const Layout = ({ children }) => {
         marginRight: '20px',
         fontWeight: '500',
         transition: 'color 0.3s ease'
+    };
+
+    const shareButtonStyle = {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '48px',
+        height: '48px',
+        margin: '0 10px',
+        borderRadius: '50%',
+        background: 'linear-gradient(to right, #40916c, #1B4332)',
+        color: '#FFFFFF',
+        textDecoration: 'none',
+        transition: 'transform 0.2s ease, background 0.3s ease',
+        cursor: 'pointer'
+    };
+
+    
+    
+    const iconStyle = {
+        width: '40px',
+        height: '40px',
+        fill: isDarkMode ? '#FFFFFF' : '#1B4332', // Changes color based on dark mode
+        margin: '0 15px',
+        cursor: 'pointer',
+        transition: 'transform 0.2s ease, fill 0.3s ease', // Added transition for color change
+        ':hover': {
+            transform: 'scale(1.1)'
+        }
     };
 
     return (
@@ -205,19 +229,42 @@ const Layout = ({ children }) => {
                     {children}
                 </main>
 
-                {/* Footer */}
+                {/* Footer with theme-matching background */}
                 <footer style={{
-                    backgroundColor: 'rgba(0,0,0,0.9)',
-                    color: 'white',
+                    backgroundColor: 'linear-gradient(to right, #40916c, #1B4332)',
+                    color: colors.textPrimary,
                     padding: '20px',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    transition: 'background-color 0.3s ease'
                 }}>
                     <section id="share">
-                        <h2>Share Your Wrapped!</h2>
-                        <a id="twitter-share" href="#" target="_blank" rel="noopener noreferrer">Share on Twitter</a>
-                        <a id="linkedin-share" href="#" target="_blank" rel="noopener noreferrer">Share on LinkedIn</a>
-                        <a id="facebook-share" href="#" target="_blank" rel="noopener noreferrer">Share on Facebook</a>
-                        <a id="instagram-share" href="#" target="_blank" rel="noopener noreferrer">Share on Instagram</a>
+                    <h2 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '2.5rem', fontWeight: '600', letterSpacing: '-0.02em' }}>Share Your Wrapped</h2>
+
+                        <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+                            {/* Twitter */}
+                            <svg viewBox="0 0 24 24" style={iconStyle} onClick={() => window.open('#', '_blank')}>
+                                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+                            </svg>
+
+                            {/* LinkedIn */}
+                            <svg viewBox="0 0 24 24" style={iconStyle} onClick={() => window.open('#', '_blank')}>
+                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                                <rect x="2" y="9" width="4" height="12"/>
+                                <circle cx="4" cy="4" r="2"/>
+                            </svg>
+
+                            {/* Facebook */}
+                            <svg viewBox="0 0 24 24" style={iconStyle} onClick={() => window.open('#', '_blank')}>
+                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                            </svg>
+
+                            {/* Instagram */}
+                            <svg viewBox="0 0 24 24" style={iconStyle} onClick={() => window.open('#', '_blank')}>
+                                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                                <path d="M12 6a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z"/>
+                                <circle cx="18.5" cy="5.5" r="1.5"/>
+                            </svg>
+                        </div>
                     </section>
                     <p>&copy; 2024 Spotify Wrapped</p>
                 </footer>
