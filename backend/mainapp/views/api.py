@@ -295,23 +295,27 @@ def create_spotify_wrap(request):
         access_token = profile.spotify_access_token
         current_year = timezone.now().year
 
-        # Get fresh Spotify data
         try:
-            # Get top artists
+            # Get top artists with logging
+            logger.info("Fetching top artists...")
             top_artists_data = spotify.get_user_top_items(access_token, 'artists', limit=20)
             if not top_artists_data.get('items'):
                 logger.warning("No top artists found")
                 top_artists_data = {'items': []}
             top_artist = top_artists_data['items'][0] if top_artists_data['items'] else {}
+            logger.info(f"Top artist data: {json.dumps(top_artist, indent=2)}")
 
-            # Get top tracks
+            # Get top tracks with logging
+            logger.info("Fetching top tracks...")
             top_tracks_data = spotify.get_user_top_items(access_token, 'tracks', limit=20)
             if not top_tracks_data.get('items'):
                 logger.warning("No top tracks found")
                 top_tracks_data = {'items': []}
             top_track = top_tracks_data['items'][0] if top_tracks_data['items'] else {}
+            logger.info(f"Top track data: {json.dumps(top_track, indent=2)}")
 
             # Get user saved albums
+            logger.info("Fetching saved albums...")
             saved_albums_data = spotify.get_user_saved_albums(access_token, limit=20)
             top_albums = {
                 'items': saved_albums_data.get('items', [])
@@ -319,6 +323,7 @@ def create_spotify_wrap(request):
             top_album = saved_albums_data['items'][0]['album'] if saved_albums_data.get('items') else {}
 
             # Get followed artists
+            logger.info("Fetching followed artists...")
             followed_artists_data = spotify.get_followed_artists(access_token, limit=5)
             followed_artists = {
                 'artists': {
@@ -332,7 +337,7 @@ def create_spotify_wrap(request):
             for artist in top_artists_data.get('items', []):
                 genres_list.extend(artist.get('genres', []))
             
-            # Count genre occurrences and structure the data
+            # Count genre occurrences
             genre_counts = {}
             for genre in genres_list:
                 genre_counts[genre] = genre_counts.get(genre, 0) + 1
@@ -361,35 +366,47 @@ def create_spotify_wrap(request):
                 top_genres=top_genres
             )
             
-            return Response({
-    'message': 'Spotify wrap created successfully',
-    'wrap_id': wrap.id,
-    'data': {
-        'top_artist': {
-            'name': top_artist.get('name'),
-            'genres': top_artist.get('genres', []),
-            'popularity': top_artist.get('popularity')
-        },
-        'top_track': {
-            'name': top_track.get('name'),
-            'artists': [artist.get('name') for artist in top_track.get('artists', [])]
-        },
-        'top_album': {
-            'name': top_album.get('name'),
-            'artists': [artist.get('name') for artist in top_album.get('artists', [])]
-        },
-        'top_genres': [genre['name'] for genre in top_genres[:5]],
-        'top_tracks': {  # Add this section
-            'items': [
-                {
-                    'name': track.get('name'),
-                    'artists': track.get('artists', [])
+            # Prepare response with complete track data
+            formatted_response = {
+                'message': 'Spotify wrap created successfully',
+                'wrap_id': wrap.id,
+                'data': {
+                    'top_artist': {
+                        'name': top_artist.get('name'),
+                        'genres': top_artist.get('genres', []),
+                        'popularity': top_artist.get('popularity')
+                    },
+                    'top_track': {
+                        'name': top_track.get('name'),
+                        'artists': [artist.get('name') for artist in top_track.get('artists', [])],
+                        'preview_url': top_track.get('preview_url'),
+                        'id': top_track.get('id'),
+                        'uri': top_track.get('uri'),
+                        'external_urls': top_track.get('external_urls', {})
+                    },
+                    'top_album': {
+                        'name': top_album.get('name'),
+                        'artists': [artist.get('name') for artist in top_album.get('artists', [])]
+                    },
+                    'top_genres': [genre['name'] for genre in top_genres[:5]],
+                    'top_tracks': {
+                        'items': [
+                            {
+                                'name': track.get('name'),
+                                'artists': [artist.get('name') for artist in track.get('artists', [])],
+                                'preview_url': track.get('preview_url'),
+                                'id': track.get('id'),
+                                'uri': track.get('uri'),
+                                'external_urls': track.get('external_urls', {})
+                            }
+                            for track in top_tracks_data.get('items', [])[:5]
+                        ]
+                    }
                 }
-                for track in top_tracks_data.get('items', [])[:5]  # Get only top 5
-            ]
-        }
-    }
-})
+            }
+            
+            logger.info(f"Formatted response: {json.dumps(formatted_response, indent=2)}")
+            return Response(formatted_response)
 
         except Exception as e:
             logger.error(f"Error creating wrap: {str(e)}")

@@ -112,16 +112,34 @@ class SpotifyAPI:
     def get_user_top_items(self, access_token, item_type, time_range='medium_term', limit=20):
         """Get user's top artists or tracks"""
         headers = {'Authorization': f'Bearer {access_token}'}
+        
+        # Add more fields for tracks
+        params = {
+            'time_range': time_range, 
+            'limit': limit
+        }
+        
+        # If getting tracks, add additional fields
+        if item_type == 'tracks':
+            params['fields'] = 'items(id,name,artists,preview_url)'
+            
         response = requests.get(
             f"{self.base_url}/me/top/{item_type}",
             headers=headers,
-            params={'time_range': time_range, 'limit': limit}
+            params=params
         )
         
         if response.status_code != 200:
             logger.error("Failed to get top %s: %s", item_type, response.text)
             return {'items': []}
-        return response.json()
+            
+        data = response.json()
+        
+        # For tracks, ensure preview_url is included in the response
+        if item_type == 'tracks':
+            logger.info("Track data example: %s", data['items'][0] if data['items'] else 'No tracks')
+            
+        return data
 
     def get_recently_played(self, access_token, limit=50):
         """Get user's recently played tracks"""

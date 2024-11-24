@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
 
@@ -8,75 +8,94 @@ const TopSong = () => {
     const [audio, setAudio] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(1);
+    const progressBarRef = useRef(null);
+    const progressBarContainerRef = useRef(null);
 
     useEffect(() => {
-        // Log initial wrapData
-        console.log('Initial wrapData:', wrapData);
-        console.log('Preview URL:', wrapData?.top_track?.preview_url);
-        
-        return () => {
-            if (audio) {
-                audio.pause();
-                audio.src = '';
-            }
-        };
-    }, [audio]);
-
-    const handlePlayPreview = (previewUrl) => {
-        console.log('Attempting to play preview URL:', previewUrl);
-        
-        if (!previewUrl) {
-            console.log('No preview URL available for this track');
-            return;
-        }
-
-        if (audio && !audio.paused) {
-            console.log('Pausing current audio');
-            audio.pause();
-            setIsPlaying(false);
-        } else {
-            console.log('Creating new audio instance');
-            const newAudio = new Audio(previewUrl);
+        if (wrapData?.top_track?.preview_url) {
+            const newAudio = new Audio(wrapData.top_track.preview_url);
+            newAudio.volume = volume;
             
-            newAudio.addEventListener('error', (e) => {
-                console.error('Audio error:', e);
+            newAudio.addEventListener('loadedmetadata', () => {
+                setDuration(newAudio.duration);
             });
 
-            newAudio.addEventListener('loadstart', () => {
-                console.log('Audio loading started');
+            newAudio.addEventListener('timeupdate', () => {
+                setCurrentTime(newAudio.currentTime);
             });
 
-            newAudio.addEventListener('canplay', () => {
-                console.log('Audio can play');
-            });
-
-            newAudio.volume = isMuted ? 0 : 1;
-            setAudio(newAudio);
-            
-            newAudio.play().then(() => {
-                console.log('Audio playing successfully');
-                setIsPlaying(true);
-            }).catch(err => {
-                console.error('Error playing audio:', err);
-            });
-            
-            newAudio.onended = () => {
-                console.log('Audio playback ended');
+            newAudio.addEventListener('ended', () => {
                 setIsPlaying(false);
+                setCurrentTime(0);
+                newAudio.currentTime = 0;
+            });
+
+            setAudio(newAudio);
+
+            return () => {
+                newAudio.pause();
+                newAudio.src = '';
             };
+        }
+    }, [wrapData?.top_track?.preview_url]);
+
+    const formatTime = (time) => {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const handlePlayPause = () => {
+        if (!audio) return;
+
+        if (isPlaying) {
+            audio.pause();
+        } else {
+            audio.play();
+        }
+        setIsPlaying(!isPlaying);
+    };
+
+    const handleVolumeChange = (e) => {
+        const newVolume = parseFloat(e.target.value);
+        setVolume(newVolume);
+        if (audio) {
+            audio.volume = newVolume;
+        }
+        if (newVolume === 0) {
+            setIsMuted(true);
+        } else if (isMuted) {
+            setIsMuted(false);
         }
     };
 
-    const toggleMute = () => {
-        console.log('Toggling mute:', !isMuted);
+    const handleMuteToggle = () => {
         if (audio) {
-            audio.volume = isMuted ? 1 : 0;
+            if (isMuted) {
+                audio.volume = volume;
+            } else {
+                audio.volume = 0;
+            }
+            setIsMuted(!isMuted);
         }
-        setIsMuted(!isMuted);
+    };
+
+    const handleProgressBarClick = (e) => {
+        if (!audio || !progressBarContainerRef.current) return;
+
+        const rect = progressBarContainerRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percentage = x / rect.width;
+        const newTime = percentage * duration;
+        
+        audio.currentTime = newTime;
+        setCurrentTime(newTime);
     };
 
     if (!wrapData) {
-        console.log('No wrap data found, navigating to /wrap');
         navigate('/wrap');
         return null;
     }
@@ -109,33 +128,13 @@ const TopSong = () => {
                         maxWidth: '600px',
                         marginBottom: '40px'
                     }}>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '20px'
+                        <h1 style={{
+                            color: '#1DB954',
+                            marginBottom: '20px',
+                            fontSize: '2.5em'
                         }}>
-                            <h1 style={{
-                                color: '#1DB954',
-                                margin: 0,
-                                fontSize: '2.5em'
-                            }}>
-                                Your Top Track
-                            </h1>
-                            <button
-                                onClick={toggleMute}
-                                style={{
-                                    backgroundColor: 'transparent',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    color: '#1DB954',
-                                    fontSize: '24px',
-                                    padding: '8px'
-                                }}
-                            >
-                                {isMuted ? '🔇' : '🔊'}
-                            </button>
-                        </div>
+                            Your Top Track
+                        </h1>
 
                         <h2 style={{
                             color: 'white',
@@ -147,32 +146,107 @@ const TopSong = () => {
                         <p style={{
                             color: '#b3b3b3',
                             fontSize: '1.5em',
-                            marginBottom: '20px'
+                            marginBottom: '30px'
                         }}>
                             by {wrapData?.top_track?.artists?.join(', ')}
                         </p>
 
                         {wrapData?.top_track?.preview_url && (
-                            <button
-                                onClick={() => handlePlayPreview(wrapData.top_track.preview_url)}
-                                style={{
-                                    backgroundColor: isPlaying ? '#1DB954' : 'transparent',
-                                    border: `2px solid ${isPlaying ? '#1DB954' : '#666'}`,
-                                    borderRadius: '50%',
-                                    width: '60px',
-                                    height: '60px',
+                            <div style={{ marginTop: '20px' }}>
+                                {/* Progress Bar */}
+                                <div 
+                                    ref={progressBarContainerRef}
+                                    onClick={handleProgressBarClick}
+                                    style={{
+                                        width: '100%',
+                                        height: '6px',
+                                        backgroundColor: '#4f4f4f',
+                                        borderRadius: '3px',
+                                        cursor: 'pointer',
+                                        marginBottom: '10px',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    <div
+                                        ref={progressBarRef}
+                                        style={{
+                                            width: `${(currentTime / duration) * 100}%`,
+                                            height: '100%',
+                                            backgroundColor: '#1DB954',
+                                            borderRadius: '3px',
+                                            transition: 'width 0.1s'
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Time Display */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    color: '#b3b3b3',
+                                    fontSize: '14px',
+                                    marginBottom: '20px'
+                                }}>
+                                    <span>{formatTime(currentTime)}</span>
+                                    <span>{formatTime(duration)}</span>
+                                </div>
+
+                                {/* Playback Controls */}
+                                <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    color: isPlaying ? 'white' : '#666',
-                                    fontSize: '24px',
-                                    transition: 'all 0.2s ease',
-                                    margin: '0 auto'
-                                }}
-                            >
-                                {isPlaying ? '⏸️' : '▶️'}
-                            </button>
+                                    gap: '20px',
+                                    marginBottom: '20px'
+                                }}>
+                                    <button
+                                        onClick={handleMuteToggle}
+                                        style={{
+                                            backgroundColor: 'transparent',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            color: '#1DB954',
+                                            fontSize: '24px',
+                                            padding: '8px'
+                                        }}
+                                    >
+                                        {isMuted ? '🔇' : '🔊'}
+                                    </button>
+
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.01"
+                                        value={isMuted ? 0 : volume}
+                                        onChange={handleVolumeChange}
+                                        style={{
+                                            width: '100px',
+                                            accentColor: '#1DB954'
+                                        }}
+                                    />
+
+                                    <button
+                                        onClick={handlePlayPause}
+                                        style={{
+                                            backgroundColor: isPlaying ? '#1DB954' : 'transparent',
+                                            border: `2px solid ${isPlaying ? '#1DB954' : '#666'}`,
+                                            borderRadius: '50%',
+                                            width: '60px',
+                                            height: '60px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            color: isPlaying ? 'white' : '#666',
+                                            fontSize: '24px',
+                                            transition: 'all 0.2s ease'
+                                        }}
+                                    >
+                                        {isPlaying ? '⏸️' : '▶️'}
+                                    </button>
+                                </div>
+                            </div>
                         )}
                     </div>
 
