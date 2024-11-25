@@ -55,7 +55,8 @@ function SpotifyWrap() {
                         name: data.data.top_track?.name || '',
                         artists: (data.data.top_track?.artists || []).map(artist => 
                             typeof artist === 'object' ? artist.name : artist
-                        )
+                        ),
+                        preview_url: data.data.top_track?.preview_url || ''
                     },
                     top_album: {
                         name: data.data.top_album?.name || '',
@@ -71,7 +72,8 @@ function SpotifyWrap() {
                             name: track.name || '',
                             artists: (track.artists || []).map(artist => 
                                 typeof artist === 'object' ? artist.name : artist
-                            )
+                            ),
+                            preview_url: track.preview_url || ''
                         }))
                     },
                     top_artists: {
