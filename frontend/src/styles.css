@@ -268,4 +268,59 @@ input[type="checkbox"]:checked + span:before {
     opacity: 0;
     transition: transform 500ms ease-in-out, opacity 500ms ease-in-out;
   }
-  
+  /* Harrison Ford Theme Styles */
+/* Harrison Ford Theme Styles */
+body.harrison-ford-theme {
+  background-color: #f0e68c; /* Light yellow background */
+  color: #8b4513; /* SaddleBrown text */
+  background-image: url('./images/stars.jpg'); /* Starry background image */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Starry background animation */
+@keyframes twinklingStars {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+body.harrison-ford-theme::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('./images/stars.jpg') repeat center center;
+  opacity: 0.6;
+  z-index: -1;
+  animation: twinklingStars 2s infinite alternate;
+}
+
+/* Large Harrison Ford image in the corner */
+#harrisonFordImage {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  width: 300px;
+  height: auto;
+}
+
+#harrisonFordImage img {
+  width: 100%;
+  border-radius: 15px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Header for Harrison Ford Theme */
+body.harrison-ford-theme header {
+  background-color: #deb887; /* Burlywood */
+}
+
+/* Footer for Harrison Ford Theme */
+body.harrison-ford-theme footer {
+  background-color: #deb887; /* Burlywood */
+}

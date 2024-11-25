@@ -1,8 +1,11 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+import harrisonFordImage from '../images/harrison_ford.jpg';
 // Create theme context with expanded color palette
 export const ThemeContext = createContext();
+
+
 
 const Layout = ({ children }) => {
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -272,9 +275,13 @@ const Layout = ({ children }) => {
                     <p>&copy; 2024 Spotify Wrapped</p>
                 </footer>
 
+                {/* Harrison Ford Image */}
                 {isHarrisonFordMode && (
                     <div id="harrisonFordImage">
-                        <img src="/images/harrison_ford.jpg" alt="Harrison Ford" />
+                        <img
+                            src={harrisonFordImage}
+                            alt="Harrison Ford"
+                        />
                     </div>
                 )}
             </div>
