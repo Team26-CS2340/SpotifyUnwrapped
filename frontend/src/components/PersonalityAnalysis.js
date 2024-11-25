@@ -1,3 +1,4 @@
+// src/components/PersonalityAnalysis.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +13,30 @@ const LoadingSpinner = () => (
         borderRadius: '50%',
         animation: 'spin 1s linear infinite'
     }} />
+);
+
+const SectionCard = ({ content }) => (
+    <div style={{
+        backgroundColor: 'var(--bg-tertiary)',
+        padding: '16px',
+        borderRadius: '8px'
+    }}>
+        <div style={{ display: 'grid', gap: '8px' }}>
+            {content.map((item, index) => (
+                <div key={index} style={{ marginLeft: '16px' }}>
+                    <span style={{ 
+                        color: '#1DB954',
+                        fontWeight: '500'
+                    }}>
+                        {item.subtitle && `${item.subtitle}: `}
+                    </span>
+                    <span style={{ color: 'var(--text-primary)' }}>
+                        {item.text}
+                    </span>
+                </div>
+            ))}
+        </div>
+    </div>
 );
 
 const PersonalityAnalysis = () => {
@@ -38,6 +63,31 @@ const PersonalityAnalysis = () => {
         } finally {
             setAnalyzing(false);
         }
+    };
+
+    const formatAnalysis = (analysisText) => {
+        const sections = analysisText.split('**').filter(Boolean);
+        const formattedSections = [];
+        
+        for (let i = 0; i < sections.length; i += 2) {
+            const title = sections[i].trim();
+            if (sections[i + 1]) {
+                const content = sections[i + 1]
+                    .split('***')
+                    .filter(Boolean)
+                    .map(item => {
+                        const [subtitle, ...textParts] = item.split(':');
+                        return {
+                            subtitle: subtitle.trim(),
+                            text: textParts.join(':').trim()
+                        };
+                    });
+                
+                formattedSections.push({ title, content });
+            }
+        }
+        
+        return formattedSections;
     };
 
     const content = (
@@ -122,98 +172,130 @@ const PersonalityAnalysis = () => {
             {/* Analysis Content */}
             {analysis && (
                 <div style={{ display: 'grid', gap: '32px' }}>
-                    {/* Profile Title */}
-                    <h2 style={{ 
-                        color: '#1DB954',
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        margin: '0 0 12px 0'
-                    }}>
-                        {analysis.profile_title}
-                    </h2>
-
-                    {/* Personality Traits */}
+                    {/* Main Analysis Section */}
                     <div style={{
                         backgroundColor: 'var(--bg-secondary)',
                         padding: '24px',
                         borderRadius: '8px',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                     }}>
-                        <h3 style={{
+                        <h2 style={{
                             color: '#1DB954',
-                            fontSize: '18px',
+                            fontSize: '20px',
                             fontWeight: 'bold',
                             marginTop: 0,
-                            marginBottom: '16px'
+                            marginBottom: '24px',
+                            borderBottom: '1px solid var(--border-color)',
+                            paddingBottom: '8px'
                         }}>
-                            1. Personality Traits and General Vibe:
-                        </h3>
-                        <p style={{ color: 'var(--text-primary)', lineHeight: '1.6' }}>
-                            {analysis.personality_traits}
-                        </p>
+                            Your Music Personality Profile
+                        </h2>
+                        <div style={{ display: 'grid', gap: '24px' }}>
+                            {formatAnalysis(analysis.analysis).map((section, index) => (
+                                <div key={index} style={{ display: 'grid', gap: '16px' }}>
+                                    <h3 style={{
+                                        fontSize: '18px',
+                                        fontWeight: '600',
+                                        color: 'var(--text-primary)',
+                                        margin: 0
+                                    }}>
+                                        {section.title}
+                                    </h3>
+                                    <SectionCard content={section.content} />
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Fashion Style */}
+                    {/* Analysis Data Section */}
                     <div style={{
                         backgroundColor: 'var(--bg-secondary)',
                         padding: '24px',
                         borderRadius: '8px',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                     }}>
-                        <h3 style={{
+                        <h2 style={{
                             color: '#1DB954',
-                            fontSize: '18px',
+                            fontSize: '20px',
                             fontWeight: 'bold',
                             marginTop: 0,
-                            marginBottom: '16px'
+                            marginBottom: '24px',
+                            borderBottom: '1px solid var(--border-color)',
+                            paddingBottom: '8px'
                         }}>
-                            2. Fashion Style and Aesthetic Preferences:
-                        </h3>
-                        <p style={{ color: 'var(--text-primary)', lineHeight: '1.6' }}>
-                            {analysis.fashion_style}
-                        </p>
-                    </div>
+                            Analysis Based On
+                        </h2>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                            gap: '24px'
+                        }}>
+                            {/* Top Artists */}
+                            <div style={{
+                                backgroundColor: 'var(--bg-tertiary)',
+                                padding: '16px',
+                                borderRadius: '8px'
+                            }}>
+                                <h3 style={{
+                                    color: '#1DB954',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    marginBottom: '12px'
+                                }}>
+                                    Top Artists
+                                </h3>
+                                <ul style={{
+                                    listStyle: 'disc',
+                                    paddingLeft: '20px',
+                                    margin: 0
+                                }}>
+                                    {analysis.music_data.top_artists.map((artist, index) => (
+                                        <li key={index} style={{
+                                            color: 'var(--text-primary)',
+                                            marginBottom: '4px',
+                                            textOverflow: 'ellipsis',
+                                            overflow: 'hidden',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            <span style={{ color: '#1DB954' }}>{index + 1}.</span> {artist}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
 
-                    {/* Hobbies and Interests */}
-                    <div style={{
-                        backgroundColor: 'var(--bg-secondary)',
-                        padding: '24px',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }}>
-                        <h3 style={{
-                            color: '#1DB954',
-                            fontSize: '18px',
-                            fontWeight: 'bold',
-                            marginTop: 0,
-                            marginBottom: '16px'
-                        }}>
-                            3. Potential Hobbies and Interests:
-                        </h3>
-                        <p style={{ color: 'var(--text-primary)', lineHeight: '1.6' }}>
-                            {analysis.hobbies_interests}
-                        </p>
-                    </div>
-
-                    {/* Social Characteristics */}
-                    <div style={{
-                        backgroundColor: 'var(--bg-secondary)',
-                        padding: '24px',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    }}>
-                        <h3 style={{
-                            color: '#1DB954',
-                            fontSize: '18px',
-                            fontWeight: 'bold',
-                            marginTop: 0,
-                            marginBottom: '16px'
-                        }}>
-                            4. Social Characteristics and Friend Group Dynamics:
-                        </h3>
-                        <p style={{ color: 'var(--text-primary)', lineHeight: '1.6' }}>
-                            {analysis.social_characteristics}
-                        </p>
+                            {/* Top Genres */}
+                            <div style={{
+                                backgroundColor: 'var(--bg-tertiary)',
+                                padding: '16px',
+                                borderRadius: '8px'
+                            }}>
+                                <h3 style={{
+                                    color: '#1DB954',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    marginBottom: '12px'
+                                }}>
+                                    Common Genres
+                                </h3>
+                                <ul style={{
+                                    listStyle: 'disc',
+                                    paddingLeft: '20px',
+                                    margin: 0
+                                }}>
+                                    {analysis.music_data.top_genres.map((genre, index) => (
+                                        <li key={index} style={{
+                                            color: 'var(--text-primary)',
+                                            marginBottom: '4px',
+                                            textOverflow: 'ellipsis',
+                                            overflow: 'hidden',
+                                            whiteSpace: 'nowrap'
+                                        }}>
+                                            <span style={{ color: '#1DB954' }}>{index + 1}.</span> {genre}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
