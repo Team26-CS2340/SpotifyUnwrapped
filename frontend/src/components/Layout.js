@@ -134,6 +134,7 @@ const Layout = ({ children }) => {
                                 <Link to="/wrap" style={navLinkStyle}>Your Wrap</Link>
                                 <Link to="/savedwraps" style={navLinkStyle}>Saved Wraps</Link>
                                 <Link to="/publicwraps" style={navLinkStyle}>View Other Wraps</Link>
+                                <Link to="/contact" style={navLinkStyle}>Contact</Link>
                             </nav>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', color: isDarkMode ? 'white' : '#333' }}>

@@ -177,12 +177,54 @@ export default function PublicWraps() {
                 throw new Error(`Failed to fetch wrap details: ${response.status}`);
             }
             
-            const wrapData = await response.json();
-            localStorage.setItem('wrapData', JSON.stringify({
+            const data = await response.json();
+            
+            // Format data to match SavedWraps format
+            const formattedData = {
                 message: 'Spotify wrap loaded successfully',
                 wrap_id: wrapId,
-                data: wrapData
-            }));
+                data: {
+                    top_artist: {
+                        name: data.top_artist?.name || '',
+                        genres: data.top_artist?.genres || [],
+                        popularity: data.top_artist?.popularity || 0
+                    },
+                    top_track: {
+                        name: data.top_track?.name || '',
+                        artists: (data.top_track?.artists || []).map(artist => 
+                            typeof artist === 'object' ? artist.name : artist
+                        ),
+                        preview_url: data.top_track?.preview_url || ''
+                    },
+                    top_album: {
+                        name: data.top_album?.name || '',
+                        artists: (data.top_album?.artists || []).map(artist => 
+                            typeof artist === 'object' ? artist.name : artist
+                        )
+                    },
+                    top_genres: data.top_genres?.map(genre => 
+                        typeof genre === 'object' ? genre.name : genre
+                    ) || [],
+                    top_tracks: {
+                        items: (data.top_tracks?.items || []).map(track => ({
+                            name: track.name || '',
+                            artists: (track.artists || []).map(artist => 
+                                typeof artist === 'object' ? artist.name : artist
+                            ),
+                            preview_url: track.preview_url || ''
+                        }))
+                    },
+                    top_artists: {
+                        items: (data.top_artists?.items || []).map(artist => ({
+                            name: artist.name || '',
+                            genres: artist.genres || [],
+                            popularity: artist.popularity || 0
+                        }))
+                    }
+                }
+            };
+    
+            localStorage.setItem('wrapData', JSON.stringify(formattedData));
             navigate('/welcome');
         } catch (err) {
             console.error('Error loading wrap:', err);
