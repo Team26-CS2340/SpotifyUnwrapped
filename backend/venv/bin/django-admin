@@ -1,4 +1,4 @@
-#!/Users/ap/Documents/SpotifyUnwrapped/backend/venv/bin/python
+#!/Users/lasyamalladi/Desktop/CS2340/SpotifyUnwrapped/backend/venv/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys

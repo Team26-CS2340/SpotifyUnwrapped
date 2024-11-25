@@ -10,6 +10,14 @@ function SpotifyWrap() {
     const themeContext = useContext(ThemeContext);
     const isDarkMode = themeContext ? themeContext.isDarkMode : false;
 
+    const themeColors = {
+        buttonBg: '#6C63FF',                
+        buttonText: '#FFFFFF',              
+        background: 'var(--bg-primary)',    
+        textPrimary: 'var(--text-primary)', 
+        accent: 'var(--accent-color)'       
+    };
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -98,147 +106,158 @@ function SpotifyWrap() {
         }
     };
 
-    if (loading) {
-        return (
-            <Layout>
-                <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center', 
-                    minHeight: 'calc(100vh - 90px)',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    flexDirection: 'column',
-                    gap: '20px'
-                }}>
-                    <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        border: '3px solid #1DB954', 
-                        borderTopColor: 'transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                    }} />
-                    <div style={{ color: '#1DB954', fontSize: '20px' }}>
-                        Creating your Wrap...
-                    </div>
-                </div>
-            </Layout>
-        );
-    }
-
-    if (error) {
-        return (
-            <Layout>
+    const content = (
+        <div style={{
+            width: '100%',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            boxSizing: 'border-box',
+            marginTop: '-10vh',
+            fontFamily: 'Quicksand, sans-serif'
+        }}>
+            <div style={{
+                width: '100%',
+                maxWidth: '900px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '40px',
+                padding: '60px 40px',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '24px',
+                boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1)'
+            }}>
+                {/* Header */}
                 <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    minHeight: 'calc(100vh - 90px)',
-                    padding: '20px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                    textAlign: 'center',
+                    marginBottom: '20px'
                 }}>
-                    <div style={{
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        padding: '30px',
-                        borderRadius: '15px',
-                        textAlign: 'center'
+                    <h1 style={{ 
+                        color: themeColors.accent,
+                        fontSize: '42px',
+                        fontWeight: 'bold',
+                        fontFamily: 'Quicksand, sans-serif',
+                        margin: '0 0 16px 0',
+                        letterSpacing: '-0.02em'
                     }}>
+                        Spotify Wrapped 2024
+                    </h1>
+                    <div style={{
+                        width: '60px',
+                        height: '4px',
+                        backgroundColor: themeColors.accent,
+                        margin: '0 auto',
+                        borderRadius: '2px'
+                    }}/>
+                </div>
+
+                {/* Content */}
+                {loading ? (
+                    <div style={{ 
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '20px'
+                    }}>
+                        <div style={{ 
+                            width: '40px', 
+                            height: '40px', 
+                            border: `3px solid ${themeColors.accent}`, 
+                            borderTopColor: 'transparent',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                        }} />
+                        <div style={{ color: themeColors.accent, fontSize: '20px' }}>
+                            Creating your Wrap...
+                        </div>
+                    </div>
+                ) : error ? (
+                    <div style={{ textAlign: 'center' }}>
                         <div style={{ color: '#ff4444', marginBottom: '20px', fontSize: '1.2em' }}>
                             Error: {error}
                         </div>
                         <button
                             onClick={() => setError(null)}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0px 6px 12px rgba(0, 0, 0, 0.2)';
+                                e.currentTarget.style.backgroundColor = '#5B54D9'; // Slightly darker purple
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.2)';
+                                e.currentTarget.style.backgroundColor = themeColors.buttonBg;
+                            }}
                             style={{
-                                backgroundColor: '#1DB954',
-                                color: 'white',
+                                backgroundColor: themeColors.buttonBg,
+                                color: themeColors.buttonText,
                                 border: 'none',
-                                padding: '10px 20px',
-                                borderRadius: '20px',
+                                padding: '14px 28px',
+                                borderRadius: '30px',
                                 cursor: 'pointer',
-                                fontSize: '1.1em',
-                                transition: 'all 0.2s ease'
-                            }}
-                            onMouseOver={(e) => {
-                                e.currentTarget.style.transform = 'scale(1.05)';
-                                e.currentTarget.style.backgroundColor = '#1ed760';
-                            }}
-                            onMouseOut={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                                e.currentTarget.style.backgroundColor = '#1DB954';
+                                fontFamily: 'Quicksand, sans-serif',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                letterSpacing: '0.5px',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)'
                             }}
                         >
                             Try Again
                         </button>
                     </div>
-                </div>
-            </Layout>
-        );
-    }
+                ) : (
+                    <>
+                        <p style={{
+                            color: 'var(--text-primary)',
+                            fontSize: '18px',
+                            marginBottom: '30px',
+                            lineHeight: '1.6',
+                            textAlign: 'center'
+                        }}>
+                            Ready to see your year in music? Click below to create your personalized Spotify Wrapped!
+                        </p>
 
-    return (
-        <Layout>
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: 'calc(100vh - 90px)',
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                padding: '20px'
-            }}>
-                <div style={{
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    padding: '40px',
-                    borderRadius: '20px',
-                    textAlign: 'center',
-                    maxWidth: '600px',
-                    width: '100%'
-                }}>
-                    <h1 style={{
-                        color: '#1DB954',
-                        fontSize: '3em',
-                        marginBottom: '20px'
-                    }}>
-                        Spotify Wrapped 2024
-                    </h1>
-                    
-                    <p style={{
-                        color: 'white',
-                        fontSize: '1.2em',
-                        marginBottom: '30px',
-                        lineHeight: '1.6'
-                    }}>
-                        Ready to see your year in music? Click below to create your personalized Spotify Wrapped!
-                    </p>
-
-                    <button
-                        onClick={createWrap}
-                        style={{
-                            backgroundColor: '#1DB954',
-                            color: 'white',
-                            border: 'none',
-                            padding: '15px 40px',
-                            borderRadius: '25px',
-                            fontSize: '1.2em',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                        }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.05)';
-                            e.currentTarget.style.backgroundColor = '#1ed760';
-                        }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                            e.currentTarget.style.backgroundColor = '#1DB954';
-                        }}
-                    >
-                        Create Your Wrap
-                    </button>
-                </div>
+                        <button
+                            onClick={createWrap}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0px 6px 12px rgba(0, 0, 0, 0.2)';
+                                e.currentTarget.style.backgroundColor = '#5B54D9'; // Slightly darker purple
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0px 4px 6px rgba(0, 0, 0, 0.2)';
+                                e.currentTarget.style.backgroundColor = themeColors.buttonBg;
+                            }}
+                            style={{
+                                backgroundColor: themeColors.buttonBg,
+                                color: themeColors.buttonText,
+                                border: 'none',
+                                padding: '14px 28px',
+                                borderRadius: '30px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
+                                minWidth: '200px',
+                                fontFamily: 'Quicksand, sans-serif',
+                                letterSpacing: '0.5px'
+                            }}
+                        >
+                            Create Your Wrap
+                        </button>
+                    </>
+                )}
             </div>
-        </Layout>
+        </div>
     );
+
+    return <Layout>{content}</Layout>;
 }
 
 export default SpotifyWrap;
