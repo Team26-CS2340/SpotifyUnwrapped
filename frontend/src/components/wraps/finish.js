@@ -12,6 +12,44 @@ function Finish() {
         setIsSharing(true);
         // You can implement actual sharing functionality here
         setTimeout(() => setIsSharing(false), 1000);
+    switch (platform) {
+        case 'Twitter':
+            window.open(`https://twitter.com/intent/tweet?text=Check out my Spotify Wrapped! 🎵 Top Artist: ${wrapData.data.top_artist.name}, 🎧 Top Track: ${wrapData.data.top_track.name}, 🎸 Top Genre: ${wrapData.data.top_genres[0]}! Get your wrap today at ${`${window.location.protocol}//${window.location.host}`}`);
+            break;
+        case 'Facebook':
+            const text2Copy = `Check out my Spotify Wrapped! 🎵 Top Artist: ${wrapData.data.top_artist.name}, 🎧 Top Track: ${wrapData.data.top_track.name}, 🎸 Top Genre: ${wrapData.data.top_genres[0]}! Get your wrap today at ${`${window.location.protocol}//${window.location.host}`}`;
+            alert('Copying text to clipboard. Please paste it in your Facebook post!');
+            navigator.clipboard.writeText(text2Copy)
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    alert('Failed to copy to clipboard. Please try again.');
+                });
+            window.open(`http://www.facebook.com/sharer.php?`);
+            break;
+        case 'WhatsApp':
+            window.open(`https://wa.me/?text=Check out my Spotify Wrapped! 🎵 Top Artist: ${wrapData.data.top_artist.name}, 🎧 Top Track: ${wrapData.data.top_track.name}, 🎸 Top Genre: ${wrapData.data.top_genres[0]}! Get your wrap today at ${`${window.location.protocol}//${window.location.host}`}`);
+            break;
+        case 'Instagram':
+            const textToCopy = `Check out my Spotify Wrapped! 🎵 Top Artist: ${wrapData.data.top_artist.name}, 🎧 Top Track: ${wrapData.data.top_track.name}, 🎸 Top Genre: ${wrapData.data.top_genres[0]}! Get your wrap today at ${`${window.location.protocol}//${window.location.host}`}`;
+            alert('Copying text to clipboard. Please paste it in your Instagram story!');
+            navigator.clipboard.writeText(textToCopy)
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    alert('Failed to copy to clipboard. Please try again.');
+                });
+            window.open(`https://www.instagram.com/`);
+            break;
+        case 'LinkedIn':
+            const linkedInText = `Check out my Spotify Wrapped! 🎵 Top Artist: ${wrapData.data.top_artist.name}, 🎧 Top Track: ${wrapData.data.top_track.name}, 🎸 Top Genre: ${wrapData.data.top_genres[0]}! Get your wrap today at ${`${window.location.protocol}//${window.location.host}`}`;
+            alert('Copying text to clipboard. Please paste it in your LinkedIn post!');
+            navigator.clipboard.writeText(linkedInText)
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert('Failed to copy to clipboard. Please try again.');
+            });
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`${window.location.protocol}//${window.location.host}`)}`);
+            break;
+    }
     };
 
     if (!wrapData) {
@@ -111,7 +149,7 @@ function Finish() {
                                 gap: '15px',
                                 flexWrap: 'wrap'
                             }}>
-                                {['Instagram', 'Twitter', 'Facebook', 'WhatsApp'].map((platform) => (
+                                {['Instagram', 'Twitter', 'Facebook', 'WhatsApp', 'LinkedIn'].map((platform) => (
                                     <button
                                         key={platform}
                                         onClick={() => handleShare(platform)}
