@@ -43,7 +43,7 @@ export default function SavedWraps() {
             
             const wrapsData = data.map(wrap => ({
                 ...wrap,
-                is_public: wrap.is_public === true || wrap.is_public === 'true' || wrap.is_public === 'True'
+                is_public: Boolean(wrap.is_public)
             }));
             
             setWraps(wrapsData);
@@ -61,13 +61,6 @@ export default function SavedWraps() {
         try {
             const csrfToken = getCookie('csrftoken');
             
-            // Immediately update the UI
-            setWraps(prevWraps => prevWraps.map(wrap =>
-                wrap.id === wrapId
-                    ? { ...wrap, is_public: !currentVisibility }
-                    : wrap
-            ));
-
             const response = await fetch(`http://localhost:8000/api/user/wrap/${wrapId}/toggle-visibility/`, {
                 method: 'POST',
                 credentials: 'include',
@@ -86,11 +79,16 @@ export default function SavedWraps() {
             const result = await response.json();
             console.log('Toggle visibility response:', result);
 
+            // Update the UI with the server response
+            setWraps(prevWraps => prevWraps.map(wrap =>
+                wrap.id === wrapId
+                    ? { ...wrap, is_public: result.is_public }
+                    : wrap
+            ));
+
         } catch (err) {
             console.error('Error updating visibility:', err);
             setError(err.message || 'Failed to update visibility');
-            // Revert the optimistic update if there was an error
-            await fetchWraps();
         }
     };
 
