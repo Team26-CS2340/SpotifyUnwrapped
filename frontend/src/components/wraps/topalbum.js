@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
 
-function Top5Artists() {
+function TopAlbum() {
     const navigate = useNavigate();
     const wrapData = JSON.parse(localStorage.getItem('wrapData'));
     
@@ -94,7 +94,7 @@ function Top5Artists() {
                 padding: '10px',
                 marginTop: '20px',
                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                backgroundImage: 'url(/Top5Artists.png)',
+                backgroundImage: 'url(/topalbum.png)',
             }}>
                 <div style={{
                     maxWidth: '1200px',
@@ -231,5 +231,5 @@ function Top5Artists() {
     );
 }
 
-export default Top5Artists;
+export default TopAlbum;
 

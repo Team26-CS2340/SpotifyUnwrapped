@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
 
@@ -13,6 +13,20 @@ const Welcome = () => {
         textPrimary: 'var(--text-primary)',
         accent: 'var(--accent-color)'
     };
+
+    const Dashboard = () => {
+        useEffect(() => {
+          // Scroll to the top of the page when the component loads
+          window.scrollTo(0, 0);
+        }, []); // Empty dependency array ensures this runs only on mount
+      
+        return (
+          <div>
+            <h1>Dashboard</h1>
+            {/* Content goes here */}
+          </div>
+        );
+      };
 
     return (
         <Layout>

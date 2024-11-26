@@ -15,6 +15,7 @@ export default function Dashboard() {
         background: '#1E2A47', // Purple container background
     };
 
+    
     // Fetch user data from the backend
     const fetchUserData = async () => {
         try {

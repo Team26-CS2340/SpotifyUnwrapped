@@ -1,5 +1,5 @@
 // src/wraps/Top5Genres.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
 
