@@ -80,6 +80,7 @@ import Finish from './components/wraps/finish';
 import SavedWraps from './components/Savedwraps';
 import PublicWraps from './components/publicwraps';
 import ContactForm from './components/contact';
+import DeleteAccount from './components/deleteaccount';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -137,6 +138,7 @@ const AnimatedRoutes = () => {
             <Route path="/savedwraps" element={<SavedWraps />} />
           <Route path="/publicwraps" element={<PublicWraps />} />
           <Route path="/contact" element={<ContactForm />} />
+          <Route path="/deleteaccount" element={<DeleteAccount />} />
         </Routes>
         </div>
       </CSSTransition>

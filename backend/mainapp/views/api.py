@@ -874,3 +874,35 @@ def contact_form(request):
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+    
+@api_view(['DELETE'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+@ensure_csrf_cookie
+def delete_account(request):
+    try:
+        user = request.user
+        profile = user.userprofile
+
+        # Delete wraps and associated likes
+        user_wraps = SpotifyWrapHistory.objects.filter(user_profile=profile)
+        WrapLike.objects.filter(wrap__in=user_wraps).delete()
+        user_wraps.delete()
+
+        # Remove from followers/following relationships
+        profile.followers.clear()
+        profile.following.clear()
+
+        # Delete profile and user
+        profile.delete()
+        user.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    except Exception as e:
+        logger.error(f"Error deleting account: {str(e)}")
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    

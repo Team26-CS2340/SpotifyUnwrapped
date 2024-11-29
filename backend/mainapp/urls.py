@@ -13,7 +13,8 @@ from .views.api import (  # Explicitly import all api views
     get_public_wraps,
     toggle_follow,
     toggle_like,
-    contact_form
+    contact_form,
+    delete_account
 )
 from .views.auth import register, sign_in, sign_out
 from .views import api, testapi
@@ -42,6 +43,7 @@ api_urlpatterns = [
     path('api/wraps/<int:wrap_id>/like/', toggle_like, name='toggle_like'),
     path('api/profile/<int:profile_id>/follow/', toggle_follow, name='toggle_follow'),
     path('api/contact/', contact_form, name='contact_form'),
+    path('api/delete-account', delete_account, name='delete-account'),
 
 ]
 
