@@ -1,6 +1,4 @@
 import os
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
 
 # Retrieve environment variables
 CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')

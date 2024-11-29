@@ -15,32 +15,30 @@ const TopSong = () => {
     const progressBarContainerRef = useRef(null);
 
     useEffect(() => {
-        if (wrapData?.top_track?.preview_url) {
-            const newAudio = new Audio(wrapData.top_track.preview_url);
-            newAudio.volume = volume;
-            
-            newAudio.addEventListener('loadedmetadata', () => {
-                setDuration(newAudio.duration);
-            });
+        const newAudio = new Audio('/previewurl.mp3');
+        newAudio.volume = volume;
+        
+        newAudio.addEventListener('loadedmetadata', () => {
+            setDuration(newAudio.duration);
+        });
 
-            newAudio.addEventListener('timeupdate', () => {
-                setCurrentTime(newAudio.currentTime);
-            });
+        newAudio.addEventListener('timeupdate', () => {
+            setCurrentTime(newAudio.currentTime);
+        });
 
-            newAudio.addEventListener('ended', () => {
-                setIsPlaying(false);
-                setCurrentTime(0);
-                newAudio.currentTime = 0;
-            });
+        newAudio.addEventListener('ended', () => {
+            setIsPlaying(false);
+            setCurrentTime(0);
+            newAudio.currentTime = 0;
+        });
 
-            setAudio(newAudio);
+        setAudio(newAudio);
 
-            return () => {
-                newAudio.pause();
-                newAudio.src = '';
-            };
-        }
-    }, [wrapData?.top_track?.preview_url]);
+        return () => {
+            newAudio.pause();
+            newAudio.src = '';
+        };
+    }, []);
 
     const formatTime = (time) => {
         const minutes = Math.floor(time / 60);
@@ -120,7 +118,6 @@ const TopSong = () => {
                 marginTop: '20px',
                 backgroundColor: themeColors.background,
                 backgroundImage: 'url(/TopSong.png)',
-
             }}>
                 <div style={{
                     maxWidth: '1200px',
@@ -162,103 +159,98 @@ const TopSong = () => {
                             by {wrapData?.top_track?.artists?.join(', ')}
                         </p>
 
-                        {wrapData?.top_track?.preview_url && (
-                            <div style={{ marginTop: '20px' }}>
-                                {/* Progress Bar */}
-                                <div 
-                                    ref={progressBarContainerRef}
-                                    onClick={handleProgressBarClick}
+                        <div style={{ marginTop: '20px' }}>
+                            <div 
+                                ref={progressBarContainerRef}
+                                onClick={handleProgressBarClick}
+                                style={{
+                                    width: '100%',
+                                    height: '6px',
+                                    backgroundColor: '#4f4f4f',
+                                    borderRadius: '3px',
+                                    cursor: 'pointer',
+                                    marginBottom: '10px',
+                                    position: 'relative'
+                                }}
+                            >
+                                <div
+                                    ref={progressBarRef}
                                     style={{
-                                        width: '100%',
-                                        height: '6px',
-                                        backgroundColor: '#4f4f4f',
+                                        width: `${(currentTime / duration) * 100}%`,
+                                        height: '100%',
+                                        backgroundColor: '#1DB954',
                                         borderRadius: '3px',
+                                        transition: 'width 0.1s'
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                color: '#b3b3b3',
+                                fontSize: '14px',
+                                marginBottom: '20px'
+                            }}>
+                                <span>{formatTime(currentTime)}</span>
+                                <span>{formatTime(duration)}</span>
+                            </div>
+
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '20px',
+                                marginBottom: '20px'
+                            }}>
+                                <button
+                                    onClick={handleMuteToggle}
+                                    style={{
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
                                         cursor: 'pointer',
-                                        marginBottom: '10px',
-                                        position: 'relative'
+                                        color: '#1DB954',
+                                        fontSize: '24px',
+                                        padding: '8px'
                                     }}
                                 >
-                                    <div
-                                        ref={progressBarRef}
-                                        style={{
-                                            width: `${(currentTime / duration) * 100}%`,
-                                            height: '100%',
-                                            backgroundColor: '#1DB954',
-                                            borderRadius: '3px',
-                                            transition: 'width 0.1s'
-                                        }}
-                                    />
-                                </div>
+                                    {isMuted ? '🔇' : '🔊'}
+                                </button>
 
-                                {/* Time Display */}
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    color: '#b3b3b3',
-                                    fontSize: '14px',
-                                    marginBottom: '20px'
-                                }}>
-                                    <span>{formatTime(currentTime)}</span>
-                                    <span>{formatTime(duration)}</span>
-                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.01"
+                                    value={isMuted ? 0 : volume}
+                                    onChange={handleVolumeChange}
+                                    style={{
+                                        width: '100px',
+                                        accentColor: '#1DB954'
+                                    }}
+                                />
 
-                                {/* Playback Controls */}
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '20px',
-                                    marginBottom: '20px'
-                                }}>
-                                    <button
-                                        onClick={handleMuteToggle}
-                                        style={{
-                                            backgroundColor: 'transparent',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            color: '#1DB954',
-                                            fontSize: '24px',
-                                            padding: '8px'
-                                        }}
-                                    >
-                                        {isMuted ? '🔇' : '🔊'}
-                                    </button>
-
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max="1"
-                                        step="0.01"
-                                        value={isMuted ? 0 : volume}
-                                        onChange={handleVolumeChange}
-                                        style={{
-                                            width: '100px',
-                                            accentColor: '#1DB954'
-                                        }}
-                                    />
-
-                                    <button
-                                        onClick={handlePlayPause}
-                                        style={{
-                                            backgroundColor: isPlaying ? '#1DB954' : 'transparent',
-                                            border: `2px solid ${isPlaying ? '#1DB954' : '#666'}`,
-                                            borderRadius: '50%',
-                                            width: '60px',
-                                            height: '60px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            color: isPlaying ? 'white' : '#666',
-                                            fontSize: '24px',
-                                            transition: 'all 0.2s ease'
-                                        }}
-                                    >
-                                        {isPlaying ? '⏸️' : '▶️'}
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={handlePlayPause}
+                                    style={{
+                                        backgroundColor: isPlaying ? '#1DB954' : 'transparent',
+                                        border: `2px solid ${isPlaying ? '#1DB954' : '#666'}`,
+                                        borderRadius: '50%',
+                                        width: '60px',
+                                        height: '60px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        color: isPlaying ? 'white' : '#666',
+                                        fontSize: '24px',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                >
+                                    {isPlaying ? '⏸️' : '▶️'}
+                                </button>
                             </div>
-                        )}
+                        </div>
                     </div>
 
                     <button
