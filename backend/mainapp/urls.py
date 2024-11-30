@@ -14,7 +14,8 @@ from .views.api import (  # Explicitly import all api views
     toggle_follow,
     toggle_like,
     contact_form,
-    delete_account
+    delete_account,
+    logout_user
 )
 from .views.auth import register, sign_in, sign_out
 from .views import api, testapi
@@ -44,6 +45,7 @@ api_urlpatterns = [
     path('api/profile/<int:profile_id>/follow/', toggle_follow, name='toggle_follow'),
     path('api/contact/', contact_form, name='contact_form'),
     path('api/delete-account', delete_account, name='delete-account'),
+    path('api/logout/', logout_user, name='logout-user'),
 
 ]
 

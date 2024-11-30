@@ -33,12 +33,38 @@ const DeleteAccount = () => {
         }
     };
 
+    const handleLogout = async () => {
+        try {
+            const token = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='))
+                ?.split('=')[1];
+    
+            const response = await fetch('/api/logout/', {  // Added leading and trailing slash
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'X-CSRFToken': token
+                }
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to logout');
+            }
+    
+            localStorage.clear();
+            navigate('/');
+        } catch (err) {
+            setError('Failed to logout. Please try again.');
+        }
+    };
+
     return (
         <Layout>
             <div className="flex justify-center items-center min-h-[calc(100vh-90px)] bg-[var(--bg-primary)] p-6">
                 <div className="bg-[var(--bg-secondary)] p-8 rounded-lg max-w-md w-full shadow-lg">
                     <h1 className="text-[var(--text-primary)] text-3xl font-bold mb-6 text-center">
-                        Delete Account
+                        Account Settings
                     </h1>
 
                     {error && (
@@ -50,20 +76,26 @@ const DeleteAccount = () => {
                     {!isConfirming ? (
                         <div className="space-y-6">
                             <p className="text-[var(--text-primary)] mb-4">
-                                Are you sure you want to delete your account? This action cannot be undone.
+                                What would you like to do with your account?
                             </p>
-                            <div className="flex justify-end space-x-4">
+                            <div className="flex flex-col space-y-4">
                                 <button
-                                    onClick={() => navigate(-1)}
-                                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+                                    onClick={handleLogout}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition w-full"
                                 >
-                                    Cancel
+                                    Logout
                                 </button>
                                 <button
                                     onClick={() => setIsConfirming(true)}
-                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition w-full"
                                 >
                                     Delete Account
+                                </button>
+                                <button
+                                    onClick={() => navigate(-1)}
+                                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition w-full"
+                                >
+                                    Cancel
                                 </button>
                             </div>
                         </div>

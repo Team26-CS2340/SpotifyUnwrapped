@@ -906,3 +906,20 @@ def delete_account(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
     
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+@ensure_csrf_cookie
+def logout_user(request):
+    try:
+        from django.contrib.auth import logout
+        logout(request)
+        return Response({
+            'message': 'Successfully logged out'
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Error during logout: {str(e)}")
+        return Response({
+            'error': 'Failed to logout',
+            'detail': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
