@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
 
@@ -6,6 +6,11 @@ function Top5Artists() {
     const navigate = useNavigate();
     const wrapData = JSON.parse(localStorage.getItem('wrapData'));
     
+    // scroll to top of site on load
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     if (!wrapData || !wrapData.data) {
         navigate('/wrap');
         return null;

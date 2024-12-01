@@ -2,11 +2,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
+import { useEffect } from 'react';
 
 function Finish() {
     const navigate = useNavigate();
     const [isSharing, setIsSharing] = useState(false);
     const wrapData = JSON.parse(localStorage.getItem('wrapData'));
+
+    // scroll to top of site on load
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const handleShare = (platform) => {
         setIsSharing(true);

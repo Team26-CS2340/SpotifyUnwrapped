@@ -15,6 +15,8 @@ const TopSong = () => {
     const progressBarContainerRef = useRef(null);
 
     useEffect(() => {
+        // scroll to top of site on load
+        window.scrollTo(0, 0);
         const newAudio = new Audio('/previewurl.mp3');
         newAudio.volume = volume;
         

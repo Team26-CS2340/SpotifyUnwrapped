@@ -10,6 +10,8 @@ const Top5Songs = () => {
     const topTracks = wrapData?.data?.top_tracks?.items?.slice(0, 5) || [];
 
     useEffect(() => {
+        // scroll to top of site on load
+        window.scrollTo(0, 0);
         audioRef.current.addEventListener('ended', () => setPlaying(null));
         return () => {
             audioRef.current.pause();

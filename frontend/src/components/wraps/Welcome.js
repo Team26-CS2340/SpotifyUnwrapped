@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../Layout';
 
 const Welcome = () => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    },[]);
 
     const themeColors = {
         buttonBg: 'var(--accent-color)',
